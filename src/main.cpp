@@ -6,6 +6,10 @@
 
 #define SLOW_SPEED 40
 
+#define TICKS_PER_FULL_ROTATION_1   2576
+#define TICKS_PER_FULL_ROTATION_2   3312
+
+
 #define ENCODER_BOARD 61
   //Read type
   #define ENCODER_BOARD_POS    0x01
@@ -175,11 +179,11 @@ bool notbeencalled = 1;
 
 void changeDir(){
 
-  Encoder_1.move(414, 200, 0, (cb) changeDir);
+  //Encoder_1.move(414, 200, 0, (cb) changeDir);
 }
 
 void changeDir2(){
-  Encoder_2.move(-322, 200, 1, (cb) changeDir2);
+  //Encoder_2.move(-322, 200, 1, (cb) changeDir2);
 }
 
 // Takes the requested position as input and returns the bot's coordinates needed to accompilsh that. 
@@ -200,8 +204,19 @@ void setup()
   pinMode(NE1, INPUT);
   Serial.begin(9600);   
 
-  Encoder_1.move(-414, 200, 0, (cb) changeDir);
-  Encoder_2.move(322, 200, 1, (cb) changeDir2);
+  double theta1, theta2;
+
+  getBotAngles(15, -15, 35.5, 10, &theta1, &theta2);
+
+  int ticks1 = (int) theta1 * TICKS_PER_FULL_ROTATION_1;
+  int ticks2 = (int) theta2 * TICKS_PER_FULL_ROTATION_2;
+
+  Serial.println(ticks1);
+  Serial.println(ticks2);
+
+
+  Encoder_1.move(ticks1, 200, 0, (cb) changeDir);
+  Encoder_2.move(ticks2, 200, 1, (cb) changeDir2);
 }
 
 // Blocking function which moves the motors 
@@ -233,7 +248,7 @@ void loop()
     Serial.print("Current:");
     Serial.println(pos1);
     while(1){
-      
+
       Encoder_1.loop();
       Encoder_2.loop();
 
