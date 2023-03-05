@@ -63,6 +63,16 @@ void isr_process_encoder2(void)
   }
 }
 
+// Takes the requested position as input and returns the bot's coordinates needed to accompilsh that. 
+// theta 2 is the offset of theta1.
+// 
+void getBotAngles( double x, double y, double l1, double l2, double *theta1, double *theta2){
+
+  double r = sqrt(pow(x,2) + pow(y,2));   // Get the hypotenus. 
+  *theta2 = acos( ( pow(r, 2) - pow(l1, 2) - pow(l2, 2) ) / 2*l1*l2 );            // compute theta 2 (offset angle of theta 1)
+  *theta1 = atan(y/x) - atan( (l2 * sin(*theta2)) / (l1 + l2*cos(*theta2) ));     // compute theta 1
+}
+
 void setup()
 {
   attachInterrupt(Encoder_1.getIntNum(), isr_process_encoder1, RISING);
@@ -103,9 +113,14 @@ void loop()
     while(1){
       
       moveto(200, 50);
-      delay(1000);
-      moveto(-200, 50);
-      delay(1000);
+
+
+      delay(2000);
+
+
+      moveto(-400, 50);
+
+      delay(2000);
 
     }
     
