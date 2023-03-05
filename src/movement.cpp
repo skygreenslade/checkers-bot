@@ -39,11 +39,11 @@ void moveTo(int motorNum, long target, uint16_t speed){
     }
 
     //positive case
-    if (target > motor.position)
-        movePos(motorNum, target, speed);
+    if (target > toMove.position)
+        movePos(toMove, target, speed);
     //negative case
     else
-        moveNeg(motorNum, target, speed);
+        moveNeg(toMove, target, speed);
 
 }//moveTo
 
