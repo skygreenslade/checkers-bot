@@ -219,6 +219,36 @@ void setup()
   Encoder_2.move(ticks2, 200, 1, (cb) changeDir2);
 }
 
+
+
+void moveTo(long distToMove, uint16_t speed){
+
+    long startPos = encoder_pos1;
+    long distMoved = 0;
+
+    //positive case
+    if (distToMove > 0){
+        while(distMoved < distToMove){
+          motor1.run(-abs(speed));
+          distMoved = encoder_pos1 - startPos;
+        }
+    }
+    //negative case
+    else {
+        while(distMoved > distToMove){
+          motor1.run(abs(speed));
+          distMoved = encoder_pos1 - startPos;
+        }
+    }
+
+
+}//moveTo
+
+
+
+
+
+
 // Blocking function which moves the motors 
 void moveto(long dist, uint16_t motorSpeed){
 
