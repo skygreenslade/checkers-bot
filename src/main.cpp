@@ -6,8 +6,8 @@
 
 #define SLOW_SPEED 40
 
-#define TICKS_PER_FULL_ROTATION_1   2576
-#define TICKS_PER_FULL_ROTATION_2   3312
+#define TICKS_PER_FULL_ROTATION_1   2576/(2*PI)
+#define TICKS_PER_FULL_ROTATION_2   3312/(2*PI)
 
 
 #define ENCODER_BOARD 61
@@ -188,37 +188,94 @@ void changeDir2(){
 
 // Takes the requested position as input and returns the bot's coordinates needed to accompilsh that. 
 // theta 2 is the offset of theta1.
-// 
+// l1 and l2 measured in cm
 void getBotAngles( double x, double y, double l1, double l2, double *theta1, double *theta2){
 
-  double r = sqrt(pow(x,2) + pow(y,2));   // Get the hypotenus. 
-  *theta2 = acos( ( pow(r, 2) - pow(l1, 2) - pow(l2, 2) ) / 2*l1*l2 );            // compute theta 2 (offset angle of theta 1)
-  *theta1 = atan(y/x) - atan( (l2 * sin(*theta2)) / (l1 + l2*cos(*theta2) ));     // compute theta 1
+    double temp1 = 0, temp2 = 0;
+
+    double r = sqrt(pow(x, 2) + pow(y, 2));  // Get the hypotenuse
+    Serial.println(r);
+    temp1 = (l1*l1 + l2*l2 - r*r) / (2 * l1 * l2);
+    Serial.print("Temp1");
+    Serial.println(temp1);
+
+    *theta2 = PI - acos(temp1);  // Compute theta 2 (offset angle of theta 1)
+    
+    Serial.println(*theta2);
+
+    temp2 = (l2 * sin(*theta2)) / (l1 + l2 * cos(*theta2));
+    Serial.print("Temp2");
+    Serial.println(temp2);  // Convert to degrees and print
+    
+    *theta1 = atan2(y, x) - atan2(temp2, 1);  // Compute theta 1
+    
+    Serial.println(*theta1);  // Convert to degrees and print
+
+
 }
+
+void waitForButton(){
+  int cnt = 0;
+  bool waiting = true;
+  while(waiting){
+    //wait
+    Serial.println("Waiting for press");
+    //Button pressed
+    if(!digitalRead(PIN_A12)){
+      cnt++;
+    }
+    else{
+      cnt = 0;
+    }
+
+    if(cnt > 100){
+      waiting = false;
+    }
+  }
+}
+
+
+double theta1, theta2;
 
 void setup()
 {
   attachInterrupt(Encoder_1.getIntNum(), isr_process_encoder1, RISING);
   attachInterrupt(Encoder_2.getIntNum(), isr_process_encoder2, RISING);
   pinMode(interruptPin, INPUT_PULLUP);
+  pinMode(PIN_A15, OUTPUT);
+  pinMode(PIN_A12, INPUT_PULLUP); // Set the button pin as an input
   pinMode(NE1, INPUT);
-  Serial.begin(9600);   
 
-  double theta1, theta2;
+  digitalWrite(PIN_A15, HIGH);
+  Serial.begin(115200);   
 
-  getBotAngles(15, -15, 35.5, 10, &theta1, &theta2);
+  waitForButton();
+  
 
-  int ticks1 = (int) theta1 * TICKS_PER_FULL_ROTATION_1;
-  int ticks2 = (int) theta2 * TICKS_PER_FULL_ROTATION_2;
+  getBotAngles(10, -10, 35.5, 25, &theta1, &theta2);
 
-  Serial.println(ticks1);
-  Serial.println(ticks2);
+  int ticks1 =  theta1 * TICKS_PER_FULL_ROTATION_1;
+  int ticks2 =  theta2 * TICKS_PER_FULL_ROTATION_2;
+
+  Encoder_1.setMotorPwm(25);
+  waitForButton();
+
+  Encoder_2.setMotorPwm(25);
+  waitForButton();
 
 
-  Encoder_1.move(ticks1, 200, 0, (cb) changeDir);
-  Encoder_2.move(ticks2, 200, 1, (cb) changeDir2);
+  Serial.print("Ticks1: ");
+  Serial.println((int) ticks1);
+  Serial.print("Ticks2: ");
+  Serial.println((int) ticks2);
+
+  Encoder_2.setPulsePos((long)0);                             // Set the positions of the robot arm
+  Encoder_2.setPulsePos((long)0);
+
+  Encoder_1.moveTo(ticks1, 100, 0, (cb) changeDir);
+  Encoder_2.moveTo(ticks2, 100, 1, (cb) changeDir2);
+
 }
-
 
 
 void moveTo(long distToMove, uint16_t speed){
@@ -241,12 +298,7 @@ void moveTo(long distToMove, uint16_t speed){
         }
     }
 
-
 }//moveTo
-
-
-
-
 
 
 // Blocking function which moves the motors 
@@ -269,22 +321,21 @@ void moveto(long dist, uint16_t motorSpeed){
 
 }
 
+
 void loop()
 {
 
     long pos1 = encoder_pos1;
     char mystr[40];
 
-    Serial.print("Current:");
-    Serial.println(pos1);
-    while(1){
+    //Serial.print("Current:");
+    //Serial.println(pos1);
 
-      Encoder_1.loop();
-      Encoder_2.loop();
+    Encoder_1.loop();
+    Encoder_2.loop();
 
       //Encoder_2.setMotorPwm(-100);
 
-    }
       
 }
 
