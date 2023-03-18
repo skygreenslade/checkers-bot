@@ -355,7 +355,7 @@ void loop()
     Serial.println(" degrees.");
 
     //approximate radians to move
-    radToMove = (degToMove*71)/4068
+    radToMove = (degToMove*71)/4068;
 
 
 
