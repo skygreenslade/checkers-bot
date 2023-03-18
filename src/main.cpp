@@ -9,7 +9,7 @@
 #define TICKS_PER_FULL_ROTATION_1   2576/(2*PI)
 #define TICKS_PER_FULL_ROTATION_2   3312/(2*PI)
 
-#define BUTTON_PRESS_DURATION 200
+#define BUTTON_PRESS_DURATION 70
 
 #define ENCODER_BOARD 61
   //Read type
@@ -63,6 +63,8 @@ bool notbeencalled = 1;
 bool joint1_complete = true;
 bool joint2_complete = true;
 
+int target_joint_angle1 = 0;
+int target_joint_angle2 = 0;
 
 struct motorInfo {
     MeMegaPiDCMotor *motor;
@@ -78,11 +80,13 @@ void isr_process_encoder1(void)
   {
     //Serial.println("hit interupt + 1");
     Encoder_1.pulsePosMinus();
+    encoder_pos1--;
   }
   else
   {
     //Serial.println("hit interupt - 1");
     Encoder_1.pulsePosPlus();
+    encoder_pos1++;
   }
 
 }
@@ -92,11 +96,12 @@ void isr_process_encoder2(void)
   if(digitalRead(Encoder_2.getPortB()) == 0)
   {
     Encoder_2.pulsePosMinus();
-    
+    encoder_pos2--;
   }
   else
   {
     Encoder_2.pulsePosPlus();
+    encoder_pos2++;
   }
 }
 
@@ -205,16 +210,59 @@ void waitForMessage(){
       Serial.print("Joint2: ");
       Serial.println(joint2, 3);
 
-      int ticks1 =  joint1 * TICKS_PER_FULL_ROTATION_1;
-      int ticks2 =  joint2 * TICKS_PER_FULL_ROTATION_2;
-
-      Encoder_1.moveTo(ticks1, 100, 0, (cb) changeDir);
-      Encoder_2.moveTo(ticks2, 100, 1, (cb) changeDir2);
+      target_joint_angle1 = - joint1*PI/180 * TICKS_PER_FULL_ROTATION_1;
+      target_joint_angle2 = - joint2*PI/180 * TICKS_PER_FULL_ROTATION_2;
 
       waiting_for_message = false;        // End the loop
     }
   }
 }
+
+// Blocking function which moves the motors 
+void moveto(long dist, uint16_t motorSpeed){
+
+  long starting_dist = encoder_pos1;
+  long ref_distance = encoder_pos1;
+  while(ref_distance > dist + 100  || ref_distance < dist - 100){
+    Serial.print("ref dist: ");
+    Serial.println(ref_distance);
+
+    if(ref_distance < dist){
+      motor1.run(-abs(motorSpeed));
+    }
+    else{
+      motor1.run(abs(motorSpeed));
+    }
+    ref_distance = encoder_pos1 - starting_dist;
+  }
+
+}
+
+void motor1_loop(){
+    if(encoder_pos1 < target_joint_angle1 - 100)
+      Encoder_1.setMotorPwm(-30);
+
+    else if((encoder_pos1 > target_joint_angle1 + 100))
+          Encoder_1.setMotorPwm(30);
+
+}
+
+
+void motor2_loop(){
+    if(encoder_pos2 < target_joint_angle2- 100){
+      Encoder_2.setMotorPwm(-30);
+    }
+
+    else if((encoder_pos2 > target_joint_angle2 + 100)){
+      Encoder_2.setMotorPwm(30);
+    }
+
+    else{
+      Encoder_2.setMotorPwm(0);
+    }
+
+}
+
 
 void setup()
 {
@@ -240,11 +288,14 @@ void setup()
   Serial.print("Second motor spinning");
 
   waitForButtonState(0);
-  Encoder_2.setMotorPwm(25);
+  Encoder_2.setMotorPwm(-25);
   waitForButtonState(1);
   Encoder_2.setMotorPwm(0);
 
   Serial.print("motors done");
+
+  encoder_pos1 = 0;
+  encoder_pos2 = PI*TICKS_PER_FULL_ROTATION_2;
 
   Encoder_1.setPulsePos((long)0);                             // Set the positions of the robot arm
   Encoder_2.setPulsePos((long)0);
@@ -265,11 +316,13 @@ void loop()
       waitForMessage();
       Serial.println("message received");
     }
+    // Serial.print("Encoder 1: ");
+    // Serial.print(encoder_pos1);
+    // Serial.print("  Encoder 2: ");
+    // Serial.println(encoder_pos2);
 
-    Encoder_1.loop();
-    Encoder_2.loop();
-
-      //Encoder_2.setMotorPwm(-100);
+    motor1_loop();
+    motor2_loop();
 
 }
 
