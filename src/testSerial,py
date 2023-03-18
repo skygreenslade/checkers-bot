@@ -1,0 +1,59 @@
+import serial
+import struct
+import time
+import threading
+
+# Configure the serial port
+ser = serial.Serial(
+    port="/dev/ttyUSB0",  # Replace with your port (e.g., '/dev/ttyACM0' or '/dev/ttyUSB0' on Linux systems)
+    baudrate=115200,
+    timeout=1
+)
+
+# Packet markers
+PACKET_START = 0x7E
+PACKET_END = 0x7F
+
+def send_packet(joint1, joint2):
+    # Convert the float values to byte arrays
+    joint1_bytes = struct.pack('<f', joint1)
+    joint2_bytes = struct.pack('<f', joint2)
+
+    # Calculate the checksum
+    checksum = 0
+    for b in bytearray([PACKET_START]) + joint1_bytes + joint2_bytes + bytearray([PACKET_END]):
+        checksum ^= b
+
+    # Build the packet
+    packet = bytearray([PACKET_START]) + joint1_bytes + joint2_bytes + bytearray([checksum]) + bytearray([PACKET_END])
+    print("Sending packet:", [hex(b) for b in packet])
+
+    # Send the packet
+    ser.write(packet)
+
+def read_serial():
+    while True:
+        line = ser.readline()
+        if line:
+            try:
+                print(line.decode('ascii').strip())
+            except UnicodeDecodeError:
+                print("Received binary data:", [hex(b) for b in line])
+
+# Example usage
+if __name__ == "__main__":
+    try:
+        # Start a thread for reading serial debug messages from the Arduino
+        read_thread = threading.Thread(target=read_serial)
+        read_thread.daemon = True
+        read_thread.start()
+
+        while True:
+            # Send example joint angles
+            send_packet(30.0, 45.0)
+            time.sleep(5)
+            send_packet(60.0, 90.0)
+            time.sleep(5)
+    except KeyboardInterrupt:
+        # Close the serial port when exiting
+        ser.close()
