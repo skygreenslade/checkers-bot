@@ -2,6 +2,7 @@ import serial
 import struct
 import time
 import threading
+import tkinter as tk
 
 # Configure the serial port
 ser = serial.Serial(
@@ -40,20 +41,40 @@ def read_serial():
             except UnicodeDecodeError:
                 print("Received binary data:", [hex(b) for b in line])
 
+def on_send_button_click():
+    try:
+        joint1 = float(joint1_entry.get())
+        joint2 = float(joint2_entry.get())
+        send_packet(joint1, joint2)
+    except ValueError:
+        print("Invalid input. Please enter valid joint angles.")
+
+
+# Create a GUI for user input
+root = tk.Tk()
+root.title("Joint Angle Sender")
+
+joint1_label = tk.Label(root, text="Joint 1 Angle (degrees):")
+joint1_label.grid(row=0, column=0, padx=10, pady=10)
+joint1_entry = tk.Entry(root)
+joint1_entry.grid(row=0, column=1)
+
+joint2_label = tk.Label(root, text="Joint 2 Angle (degrees):")
+joint2_label.grid(row=1, column=0, padx=10, pady=10)
+joint2_entry = tk.Entry(root)
+joint2_entry.grid(row=1, column=1)
+
+send_button = tk.Button(root, text="Send Angles", command=on_send_button_click)
+send_button.grid(row=2, column=0, columnspan=2, pady=10)
+
 # Example usage
 if __name__ == "__main__":
-    try:
-        # Start a thread for reading serial debug messages from the Arduino
-        read_thread = threading.Thread(target=read_serial)
-        read_thread.daemon = True
-        read_thread.start()
+    # Start a thread for reading serial debug messages from the Arduino
+    read_thread = threading.Thread(target=read_serial)
+    read_thread.daemon = True
+    read_thread.start()
 
-        while True:
-            # Send example joint angles
-            send_packet(30.0, 45.0)
-            time.sleep(5)
-            send_packet(60.0, 90.0)
-            time.sleep(5)
-    except KeyboardInterrupt:
-        # Close the serial port when exiting
-        ser.close()
+    root.mainloop()
+
+    # Close the serial port when exiting
+    ser.close()

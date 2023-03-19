@@ -6,8 +6,8 @@
 
 #define SLOW_SPEED 40
 
-#define TICKS_PER_FULL_ROTATION_1   2576/(2*PI)
-#define TICKS_PER_FULL_ROTATION_2   3312/(2*PI)
+#define TICKS_PER_FULL_ROTATION_2   2576/(2*PI)
+#define TICKS_PER_FULL_ROTATION_1   3312/(2*PI)
 
 #define BUTTON_PRESS_DURATION 70
 
@@ -63,8 +63,8 @@ bool notbeencalled = 1;
 bool joint1_complete = true;
 bool joint2_complete = true;
 
-int target_joint_angle1 = 0;
-int target_joint_angle2 = 0;
+int target_joint_ticks1 = 0;
+int target_joint_ticks2 = 0;
 
 struct motorInfo {
     MeMegaPiDCMotor *motor;
@@ -103,20 +103,6 @@ void isr_process_encoder2(void)
     Encoder_2.pulsePosPlus();
     encoder_pos2++;
   }
-}
-
-void changeDir(){
-  joint1_complete = true;
-  Serial.println("joint 1 complete");
-
-  //Encoder_1.move(414, 200, 0, (cb) changeDir);
-}
-
-void changeDir2(){
-  joint2_complete = true;
-  Serial.println("joint 2 complete");
-
-  //Encoder_2.move(-322, 200, 1, (cb) changeDir2);
 }
 
 // Takes the requested position as input and returns the bot's coordinates needed to accompilsh that. 
@@ -188,34 +174,52 @@ void waitForMessage(){
 
   bool waiting_for_message = true;
 
-  while (Serial.available() > 0 || waiting_for_message) {
+  while (waiting_for_message) {
     // Read the next byte from the serial port
+    while(Serial.available() == 0){
+      // Do nothing
+      _NOP();        
+    }
     byte data = Serial.read();
 
     // Add the byte to the circular buffer
     buffer[bufferIndex] = data;
-    bufferIndex = (bufferIndex + 1) % BUFFER_SIZE;
 
-    printBuffer();
+    if(data == PACKET_END){
+      printBuffer();
+
+      Serial.print("Compare 1: ");
+      Serial.println(buffer[(bufferIndex)], HEX);
+      Serial.print("Compare 2: ");
+      Serial.println(buffer[(bufferIndex - 10)], HEX);
+      Serial.print("buffer index: ");
+      Serial.println(bufferIndex);
+
+    }
    
+  
     // Check if a complete packet is in the buffer
-    if (bufferIndex >= 11 && buffer[(bufferIndex - 1)] == PACKET_END && buffer[(bufferIndex - 11)] == PACKET_START) {
+    if (bufferIndex >= 10 && buffer[(bufferIndex )] == PACKET_END && buffer[(bufferIndex - 10)] == PACKET_START) {
       // Calculate checksum
       // Process message
-      joint1 = bytesToFloat(buffer, (bufferIndex - 10) % BUFFER_SIZE);
-      joint2 = bytesToFloat(buffer, (bufferIndex - 6) % BUFFER_SIZE);
+      joint1 = bytesToFloat(buffer, (bufferIndex - 9) % BUFFER_SIZE);
+      joint2 = bytesToFloat(buffer, (bufferIndex - 5) % BUFFER_SIZE);
         
       Serial.print("Joint1: ");
       Serial.println(joint1, 3);
       Serial.print("Joint2: ");
       Serial.println(joint2, 3);
 
-      target_joint_angle1 = - joint1*PI/180 * TICKS_PER_FULL_ROTATION_1;
-      target_joint_angle2 = - joint2*PI/180 * TICKS_PER_FULL_ROTATION_2;
+      target_joint_ticks1 = - joint1*PI/180 * TICKS_PER_FULL_ROTATION_1;
+      target_joint_ticks2 = joint2*PI/180 * TICKS_PER_FULL_ROTATION_2;
 
       waiting_for_message = false;        // End the loop
     }
+   
+    bufferIndex = (bufferIndex + 1) % BUFFER_SIZE;
+
   }
+
 }
 
 // Blocking function which moves the motors 
@@ -239,25 +243,32 @@ void moveto(long dist, uint16_t motorSpeed){
 }
 
 void motor1_loop(){
-    if(encoder_pos1 < target_joint_angle1 - 100)
-      Encoder_1.setMotorPwm(-30);
+    if(encoder_pos1 < target_joint_ticks1 - 1){
+      Encoder_1.setMotorPwm(25);
+    }
 
-    else if((encoder_pos1 > target_joint_angle1 + 100))
-          Encoder_1.setMotorPwm(30);
+    else if((encoder_pos1 > target_joint_ticks1 + 1)){
+      Encoder_1.setMotorPwm(-25);
+    }
+    else{
+      joint1_complete = true;
+      Encoder_1.setMotorPwm(0);
+    }
 
 }
 
 
 void motor2_loop(){
-    if(encoder_pos2 < target_joint_angle2- 100){
-      Encoder_2.setMotorPwm(-30);
-    }
-
-    else if((encoder_pos2 > target_joint_angle2 + 100)){
+    if(encoder_pos2 < target_joint_ticks2- 1){
       Encoder_2.setMotorPwm(30);
     }
 
+    else if((encoder_pos2 > target_joint_ticks2 + 1)){
+      Encoder_2.setMotorPwm(-30);
+    }
+
     else{
+      joint2_complete = true;
       Encoder_2.setMotorPwm(0);
     }
 
@@ -288,7 +299,7 @@ void setup()
   Serial.print("Second motor spinning");
 
   waitForButtonState(0);
-  Encoder_2.setMotorPwm(-25);
+  Encoder_2.setMotorPwm(25);
   waitForButtonState(1);
   Encoder_2.setMotorPwm(0);
 
@@ -309,20 +320,29 @@ void loop()
     long pos1 = encoder_pos1;
     char mystr[40];
 
+    Serial.print("Encoder 1: ");
+    Serial.print(encoder_pos1);
+    Serial.print(", Target 1: ");
+    Serial.print(target_joint_ticks1);
+    Serial.print(", Encoder 2: ");
+    Serial.print(encoder_pos2);
+    Serial.print(", Target 2: ");
+    Serial.println(target_joint_ticks2);
+
+    motor1_loop();
+    motor2_loop();
+
     if(joint1_complete && joint2_complete){
       Serial.println("waiting for message");
+      Encoder_1.setMotorPwm(0);             // Stop the motors
+      Encoder_2.setMotorPwm(0);
+
       joint1_complete = false;
       joint2_complete = false;
       waitForMessage();
       Serial.println("message received");
     }
-    // Serial.print("Encoder 1: ");
-    // Serial.print(encoder_pos1);
-    // Serial.print("  Encoder 2: ");
-    // Serial.println(encoder_pos2);
 
-    motor1_loop();
-    motor2_loop();
 
 }
 
