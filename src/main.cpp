@@ -5,9 +5,11 @@
 #include <HardwareSerial.h>
 
 #define SLOW_SPEED 40
+#define DEBUG
 
 #define TICKS_PER_FULL_ROTATION_2   2576/(2*PI)
 #define TICKS_PER_FULL_ROTATION_1   3312/(2*PI)
+#define TICKS_PER_FULL_ROTATION_3   5400/(2*PI)
 
 #define BUTTON_PRESS_DURATION 70
 
@@ -54,23 +56,44 @@ MeMegaPiDCMotor motor2(PORT1A);
 
 MeEncoderOnBoard Encoder_1(SLOT1);
 MeEncoderOnBoard Encoder_2(SLOT2);
-
+MeEncoderOnBoard Encoder_3(SLOT3);
 
 volatile long encoder_pos1 = 0;
 volatile long encoder_pos2 = 0;
+volatile long encoder_pos3 = 0;
 
 bool notbeencalled = 1;
 bool joint1_complete = true;
 bool joint2_complete = true;
 
-int target_joint_ticks1 = 0;
-int target_joint_ticks2 = 0;
+volatile int target_joint_ticks1 = 0;
+volatile int target_joint_ticks2 = 0;
+volatile int target_joint_ticks3 = 0;
 
 struct motorInfo {
     MeMegaPiDCMotor *motor;
     MeEncoderOnBoard *encoder;
     volatile long *position;
 };
+
+enum arm_states{
+  RAISED_RELEASED = 0,
+  LOWERED_RELEASED,
+  LOWERED_GRIPPING,
+  RAISED_GRIPPING
+};
+arm_states arm = RAISED_RELEASED;
+
+enum bot_states{
+  MOVING = 0,
+  RECEIVING_MESSAGE,
+  PICKUP_ROUTINE,
+  DROP_ROUTINE = 4
+};
+bot_states bot_state = RECEIVING_MESSAGE;
+
+
+
 
 
 void isr_process_encoder1(void)
@@ -104,6 +127,19 @@ void isr_process_encoder2(void)
     encoder_pos2++;
   }
 }
+
+void isr_process_encoder3(void)
+{
+  if(digitalRead(Encoder_3.getPortB()) == 0)
+  {
+    encoder_pos3--;
+  }
+  else
+  {
+    encoder_pos3++;
+  }
+}
+
 
 // Takes the requested position as input and returns the bot's coordinates needed to accompilsh that. 
 // theta 2 is the offset of theta1.
@@ -199,19 +235,25 @@ void waitForMessage(){
    
   
     // Check if a complete packet is in the buffer
-    if (bufferIndex >= 10 && buffer[(bufferIndex )] == PACKET_END && buffer[(bufferIndex - 10)] == PACKET_START) {
+    if (bufferIndex >= 10 && buffer[(bufferIndex)] == PACKET_END && buffer[(bufferIndex - 10)] == PACKET_START) {
       // Calculate checksum
       // Process message
       joint1 = bytesToFloat(buffer, (bufferIndex - 9) % BUFFER_SIZE);
       joint2 = bytesToFloat(buffer, (bufferIndex - 5) % BUFFER_SIZE);
+      bot_state = static_cast<bot_states>(buffer[bufferIndex-1]);
         
       Serial.print("Joint1: ");
       Serial.println(joint1, 3);
       Serial.print("Joint2: ");
       Serial.println(joint2, 3);
+      Serial.print("bot state: ");
+      Serial.println(bot_state, 3);
 
       target_joint_ticks1 = - joint1*PI/180 * TICKS_PER_FULL_ROTATION_1;
       target_joint_ticks2 = joint2*PI/180 * TICKS_PER_FULL_ROTATION_2;
+
+      joint1_complete = false;
+      joint2_complete = false;
 
       waiting_for_message = false;        // End the loop
     }
@@ -274,11 +316,143 @@ void motor2_loop(){
 
 }
 
+void motor3_loop(){
+    if(encoder_pos3 < target_joint_ticks3 - 1){
+      Encoder_3.setMotorPwm(45);
+    }
+
+    else if((encoder_pos3 > target_joint_ticks3 + 1)){
+      Encoder_3.setMotorPwm(-45);
+    }
+    else{
+      Encoder_3.setMotorPwm(0);
+    }
+
+}
+
+
+void updateDropRoutine(){
+
+  switch (arm)
+  {
+    case RAISED_GRIPPING:
+      // Code to move it to lowered state
+      target_joint_ticks3 = -25*PI/180*TICKS_PER_FULL_ROTATION_3;
+      Serial.print(encoder_pos3);
+      Serial.print(" ");
+      Serial.println(target_joint_ticks3);
+
+      if(encoder_pos3 < target_joint_ticks3+5 && encoder_pos3 > target_joint_ticks3-5){
+        arm = LOWERED_GRIPPING;   // Switch states
+        Encoder_3.setMotorPwm(0);
+
+        Serial.println("Lowered");
+      }
+
+      break;
+    case LOWERED_GRIPPING:
+      // Move to gripping state
+
+      Serial.println("LOWERED_RELEASED");
+
+      arm = LOWERED_RELEASED;   // trigger this once gripped
+
+      break;
+
+    case LOWERED_RELEASED:
+      target_joint_ticks3 = 0;
+      Serial.print(encoder_pos3);
+      Serial.print(" ");
+      Serial.println(target_joint_ticks3);
+
+      if(encoder_pos3 < target_joint_ticks3+5 && encoder_pos3 > target_joint_ticks3-5){
+        arm = RAISED_RELEASED;   // Switch states
+        Encoder_3.setMotorPwm(0);
+
+        Serial.println("RAISED_GRIPPED");
+
+      }
+      // Move to raised gripping state
+      break;
+
+    case RAISED_RELEASED:
+      Serial.println("RAISED_GRIPPING");
+      // Done!
+      Serial.println("Completed pickup routine");
+
+      break;
+  
+      default:
+        break;
+  }
+
+}
+
+
+void updatePickupRoutine(){
+
+  switch (arm)
+  {
+    case RAISED_RELEASED:
+      // Code to move it to lowered state
+      target_joint_ticks3 = -25*PI/180*TICKS_PER_FULL_ROTATION_3;
+      Serial.print(encoder_pos3);
+      Serial.print(" ");
+      Serial.println(target_joint_ticks3);
+
+      if(encoder_pos3 < target_joint_ticks3+5 && encoder_pos3 > target_joint_ticks3-5){
+        arm = LOWERED_RELEASED;   // Switch states
+        Encoder_3.setMotorPwm(0);
+
+        Serial.println("Lowered");
+      }
+
+      break;
+    case LOWERED_RELEASED:
+      // Move to gripping state
+
+      Serial.println("LOWERED_RELEASED");
+
+      arm = LOWERED_GRIPPING;   // trigger this once gripped
+
+      break;
+
+    case LOWERED_GRIPPING:
+      target_joint_ticks3 = 0;
+      Serial.print(encoder_pos3);
+      Serial.print(" ");
+      Serial.println(target_joint_ticks3);
+
+      if(encoder_pos3 < target_joint_ticks3+5 && encoder_pos3 > target_joint_ticks3-5){
+        arm = RAISED_GRIPPING;   // Switch states
+        Encoder_3.setMotorPwm(0);
+
+        Serial.println("RAISED_GRIPPED");
+
+      }
+      // Move to raised gripping state
+      break;
+
+    case RAISED_GRIPPING:
+      Serial.println("RAISED_GRIPPING");
+      // Done!
+      Serial.println("Completed pickup routine");
+
+      break;
+  
+      default:
+        break;
+  }
+
+}
+
 
 void setup()
 {
   attachInterrupt(Encoder_1.getIntNum(), isr_process_encoder1, RISING);
   attachInterrupt(Encoder_2.getIntNum(), isr_process_encoder2, RISING);
+  attachInterrupt(Encoder_3.getIntNum(), isr_process_encoder3, RISING);
+
   pinMode(interruptPin, INPUT_PULLUP);
   pinMode(PIN_A15, OUTPUT);
   pinMode(PIN_A12, INPUT_PULLUP); // Set the button pin as an input
@@ -303,45 +477,80 @@ void setup()
   waitForButtonState(1);
   Encoder_2.setMotorPwm(0);
 
+  Serial.print("Third motor spinning");
+
+  waitForButtonState(0);
+  Encoder_3.setMotorPwm(-45);
+  waitForButtonState(1);
+  Encoder_3.setMotorPwm(0);
+
   Serial.print("motors done");
 
   encoder_pos1 = 0;
   encoder_pos2 = PI*TICKS_PER_FULL_ROTATION_2;
-
-  Encoder_1.setPulsePos((long)0);                             // Set the positions of the robot arm
-  Encoder_2.setPulsePos((long)0);
-
+  encoder_pos3 = 0;
 }
 
 
 void loop()
 {
 
-    long pos1 = encoder_pos1;
-    char mystr[40];
+    switch(bot_state){
 
-    Serial.print("Encoder 1: ");
-    Serial.print(encoder_pos1);
-    Serial.print(", Target 1: ");
-    Serial.print(target_joint_ticks1);
-    Serial.print(", Encoder 2: ");
-    Serial.print(encoder_pos2);
-    Serial.print(", Target 2: ");
-    Serial.println(target_joint_ticks2);
+      case MOVING:
+
+        #ifdef DEBUG
+        Serial.print("Encoder 1: ");
+        Serial.print(encoder_pos1);
+        Serial.print(", Target 1: ");
+        Serial.print(target_joint_ticks1);
+        Serial.print(", Encoder 2: ");
+        Serial.print(encoder_pos2);
+        Serial.print(", Target 2: ");
+        Serial.println(target_joint_ticks2);
+        #endif
+
+
+
+        if(joint1_complete && joint2_complete){
+          bot_state = RECEIVING_MESSAGE;
+          joint1_complete = false;              // reset flags
+          joint2_complete = false;
+        }
+      break;
+
+      case RECEIVING_MESSAGE:
+        Serial.println("Waiting for message");
+        Encoder_1.setMotorPwm(0);             // Stop the motors (double check theyre stopped)
+        Encoder_2.setMotorPwm(0);
+        Encoder_3.setMotorPwm(0);
+
+        waitForMessage();                     // block until message received
+        Serial.println("recv");
+      break;
+
+      case PICKUP_ROUTINE:
+        updatePickupRoutine();    // Update pickup routine state
+
+        if(arm == RAISED_GRIPPING){
+          bot_state = RECEIVING_MESSAGE;
+        }
+      break;
+
+      case DROP_ROUTINE:
+        updateDropRoutine();    // Update pickup routine state
+        
+        if(arm == RAISED_RELEASED){
+          bot_state = RECEIVING_MESSAGE;
+        }
+      break;
+
+
+    }
 
     motor1_loop();
     motor2_loop();
-
-    if(joint1_complete && joint2_complete){
-      Serial.println("waiting for message");
-      Encoder_1.setMotorPwm(0);             // Stop the motors
-      Encoder_2.setMotorPwm(0);
-
-      joint1_complete = false;
-      joint2_complete = false;
-      waitForMessage();
-      Serial.println("message received");
-    }
+    motor3_loop();            // Update motor to execute picktup routine state
 
 
 }
