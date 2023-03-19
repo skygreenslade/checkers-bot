@@ -18,6 +18,17 @@ boardState = [[0, 3, 0, 3, 0, 3, 0, 3],
               [0, 2, 0, 2, 0, 2, 0, 2],
               [2, 0, 2, 0, 2, 0, 2, 0]]
 
+newBoard = [[0, 3, 0, 3, 0, 3, 0, 3],
+              [3, 0, 3, 0, 3, 0, 3, 0],
+              [0, 3, 0, 3, 0, 3, 0, 3],
+              [0, 0, 0, 0, 0, 0, 0, 0],
+              [0, 0, 0, 0, 0, 0, 0, 0],
+              [2, 0, 2, 0, 2, 0, 2, 0],
+              [0, 2, 0, 2, 0, 2, 0, 2],
+              [2, 0, 2, 0, 2, 0, 2, 0]]
+
+
+
 
 #################### functions ########################
 
@@ -135,8 +146,10 @@ def getCol(letter):
 #moves piece at oldPos to newPos on given board (if movement is valid)
 def move(oldPos, newPos, board):
 
-    error = 0 #error code for function
-    capture = False #flag of if a piece was captured
+    error = 0           #error code for function
+    capture = False     #flag of if a piece was captured
+    kingPiece = False   #boolean of if piece is a king piece or not
+    piece = 0           #holds piece
 
     #convert given positions into array indices
     oldRow = getRow(oldPos[0])
@@ -148,26 +161,80 @@ def move(oldPos, newPos, board):
     if oldRow == None or oldCol == None or oldCol == None or newCol == None:
         error  = 1 #invalid input
 
-    #check if there is already a piece at new location
-    elif boardState[newRow][newCol] != 0:
-        error = 2 #illegal nove: piece already at new location
-
     #check that the move only involves legal squares
     elif ((oldRow+oldCol)%2) == 0 or ((newRow+newCol)%2) == 0:
         error = 1 #invalid input
+
+    #check if there is already a piece at new location
+    elif boardState[newRow][newCol] != 0:
+        error = 2 #illegal move: piece already at new location
+
+    #proceed if no error is found
+    if not error:
+
+        #get piece to move
+        piece = boardState[oldRow][oldCol]
+
+        #check if piece is a king piece
+        if piece > 10:
+            kingPiece = True
     
-    #check that move either moves one square diagonally, or is jumping over an opponent piece
-    elif abs(oldRow-newRow) != 1 or abs(oldCol-newCol) != 1:
-        if abs(oldRow-newRow) != 2 or abs(oldCol - newCol) != 2:
-            error = 3 #illegal move: not how pieces move
-        elif boardState[(oldRow+newRow)//2][(oldCol+newCol)//2]%(boardState[oldRow][oldCol]%10) == 0:
-            error = 4 #illegal move: no piece to capture 
-        else:
-            capture = True
+        #check if move is legal for king piece
+    
+        #if a king piece is not moving one square diagonally 
+        if kingPiece and (abs(oldRow-newRow) != 1 or abs(oldCol-newCol) != 1):
+            
+            # if piece did not "jump" over a space diagonally 
+            if abs(oldRow-newRow) != 2 or abs(oldCol - newCol) != 2:
+                error = 3 #illegal move: not how pieces move
+
+            #if piece did not jump over an opponent piece
+            elif boardState[(oldRow+newRow)//2][(oldCol+newCol)//2]%(piece%10) == 0:
+                error = 4 #illegal move: no piece to capture
+
+                #if prev cases are false, piece moved diagonally, over an opponent piece
+            else:
+                capture = True
+        
+        elif not kingPiece:
+            
+            #robot piece case, when not moving one space diagonally
+            if piece == 2 and ((oldRow - newRow) != 1 or abs(oldCol - newCol) != 1):
+                
+                #if piece did not jump diagonally in the correct direction
+                if (oldRow - newRow) != 2 or abs (oldCol - newCol) != 2:
+                    error = 3 #illegal move: not how pieces move
+
+
+                #if piece did not jump over an opponent piece
+                elif boardState[(oldRow+newRow)//2][(oldCol+newCol)//2]%(piece%10) == 0:
+                    error = 4 #illegal move: no piece to capture 
+
+                #if previous cases are false, piece moved diagonally in the right direction, over an opponent piece 
+                else:
+                    capture = True
+            
+            #opponent piece case, when not moving one space diagonally
+            elif piece == 3 and ((oldRow - newRow) != -1 or abs(oldCol - newCol) != 1):
+
+                #if piece did not jump diagonally in the correct direction
+                if (oldRow - newRow) != -2 or abs (oldCol - newCol) != 2:
+                    error = 3 #illegal move: not how pieces move
+
+
+                #if piece did not jump over an opponent piece
+                elif boardState[(oldRow+newRow)//2][(oldCol+newCol)//2]%(piece%10) == 0:
+                    error = 4 #illegal move: no piece to capture 
+
+                #if previous cases are false, piece moved diagonally in the right direction, over an opponent piece 
+                else:
+                    capture = True
+
 
     #if no error, execute move
-    if error == 0:
+    if not error:
         
+        #move piece from old location to new location
         piece = boardState[oldRow][oldCol]
         boardState[oldRow][oldCol] = 0
         boardState[newRow][newCol] = piece
@@ -175,6 +242,13 @@ def move(oldPos, newPos, board):
         #remove piece if one was captured
         if capture:
             boardState[(oldRow+newRow)//2][(oldCol+newCol)//2] = 0
+
+        #make king piece if piece made it top opposite end
+        if piece == 2 and newRow == 0:
+            boardState[newRow][newCol]*=11
+        elif piece == 3 and newRow == 7:
+            boardState[newRow][newCol]*=11
+
 
     return error
 #move
@@ -195,9 +269,9 @@ newBoard = input("Press '0' for new board\n")
 
 
 if newBoard == '0':
-    printBoard(boardState)
-
-
+    boardState = newBoard
+    
+printBoard(boardState)
 
 
 #run until user exits
@@ -221,14 +295,24 @@ while exit == False:
         moveTo = params[2] 
         
         error = move(toMove, moveTo, boardState)
-        print(error)
 
-        # piece = boardState[oldrow][oldcol]
-        # boardState[oldrow][oldcol] = 0
-        # boardState[newrow][newcol] = piece
+        if error == 1:
+            print("Error: invalid input.")
+        elif error == 2:
+            print("Error: invalid move. Piece already at target destination")
+        elif error == 3:
+            print("Error: invalid move. Pieces must move one space diagonally, or two when capturing")
+        elif error == 4:
+            print("Error: invalid move. No opponent piece to capture")
         
+        #output board state
         printBoard(boardState)
 
+
+
+    #print board state command
+    elif cmd == 'b':
+        printBoard(boardState)
 
 
  
@@ -237,8 +321,10 @@ while exit == False:
         print("commands:")
         print("\t x,\t\t Exit program")
         print("\t mv,\t\t Move piece from coord X# to X#, eg: mv C1 D2")
+        print("\t b, \t\t Print current board state")
         print("\t h, help,\t display this message")
-    
+
+
     #default
     else:
         print("Sorry, that command is unrecognized. Enter \"help\" for help.")
