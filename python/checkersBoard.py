@@ -2,10 +2,10 @@
 
 
 # 0 = blank
-# 1 = robot
-# 2 = opponent
-# 11 = robot king piece
-# 22 = opponent king piece
+# 2 = robot
+# 3 = opponent
+# 22 = robot king piece
+# 33 = opponent king piece
 
 
 # top of board is away from robot
@@ -18,7 +18,8 @@ boardState = [[0, 3, 0, 3, 0, 3, 0, 3],
               [0, 2, 0, 2, 0, 2, 0, 2],
               [2, 0, 2, 0, 2, 0, 2, 0]]
 
-newBoard = [[0, 3, 0, 3, 0, 3, 0, 3],
+
+newBoard =   [[0, 3, 0, 3, 0, 3, 0, 3],
               [3, 0, 3, 0, 3, 0, 3, 0],
               [0, 3, 0, 3, 0, 3, 0, 3],
               [0, 0, 0, 0, 0, 0, 0, 0],
