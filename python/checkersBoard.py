@@ -1,11 +1,17 @@
 
-
+import os, sys #FIFOs
 
 # 0 = blank
 # 2 = robot
 # 3 = opponent
 # 22 = robot king piece
 # 33 = opponent king piece
+
+
+#fifo to write robot's (legal) moves to
+fifoPath = "../moves"
+fifo = None     #holds fd for fifo
+
 
 
 # top of board is away from robot
@@ -137,9 +143,9 @@ def getCol(letter):
         pass
 
     # set to Null if out of bounds
-    if col > 8 or col < 0:
+    if (not isinstance(col, int)) or col > 8 or col < 0:
         col = None
-
+    
     return col
 #getCol
 
@@ -152,15 +158,25 @@ def move(oldPos, newPos, board):
     kingPiece = False   #boolean of if piece is a king piece or not
     piece = 0           #holds piece
 
-    #convert given positions into array indices
-    oldRow = getRow(oldPos[0])
-    newRow = getRow(newPos[0])
-    oldCol = getCol(oldPos[1])
-    newCol = getCol(newPos[1])
+    #hold coordinates of old and new position for piece
+    oldRow = None
+    newRow = None
+    oldCol = None
+    newCol = None
+
+    #ensure arguments are long enough
+    if len(oldPos) > 1 and len(newPos) > 1: 
+        #convert given positions into array indices
+        oldRow = getRow(oldPos[0])
+        newRow = getRow(newPos[0])
+        oldCol = getCol(oldPos[1])
+        newCol = getCol(newPos[1])
 
     #check that given values were valid
-    if oldRow == None or oldCol == None or oldCol == None or newCol == None:
+    if oldRow is None or oldCol is None or oldCol is None or newCol is None:
         error  = 1 #invalid input
+    elif isinstance(oldCol, type(None)) or isinstance(newCol, type(None)) or isinstance(oldRow, type(None)) or isinstance(newRow, type(None)):
+        error = 1 #invalid input
 
     #check that the move only involves legal squares
     elif ((oldRow+oldCol)%2) == 0 or ((newRow+newCol)%2) == 0:
@@ -244,15 +260,37 @@ def move(oldPos, newPos, board):
         if capture:
             boardState[(oldRow+newRow)//2][(oldCol+newCol)//2] = 0
 
-        #make king piece if piece made it top opposite end
+        #make king piece if piece made it to opposite end
         if piece == 2 and newRow == 0:
             boardState[newRow][newCol]*=11
         elif piece == 3 and newRow == 7:
             boardState[newRow][newCol]*=11
 
 
+        #write to FIFO if move was a legal robot move
+        if piece%3 != 0:
+            output = cmd + ' ' + oldPos + ' ' + newPos + '\n'
+            oputMove(output)
+            
+
     return error
 #move
+
+
+
+#outputs given string to given fifo
+def oputMove(toOput):
+    print("writing to fifo: ",toOput)
+
+    #write to fifo
+    fifo.write(toOput)
+    fifo.flush()
+
+#oputMove
+
+
+
+
 
 
 
@@ -266,17 +304,35 @@ exit = False
 
 print("Welcome to the Checkers Board Script.")
 
-newBoard = input("Press '0' for new board\n")
+new = input("Press '0' for new board\n")
 
 
-if newBoard == '0':
+if new == '0':
     boardState = newBoard
     
 printBoard(boardState)
 
 
+#create and open FIFO
+try:
+    os.mkfifo(fifoPath)
+except OSError as err:
+    print("Failed to create FIFO, %s" % err)
+try:
+    print("opening FIFO. Will wait for reader.")
+    fifo = open(fifoPath, 'w', 1)
+except OSError as err:
+    print("Error opening file, %s", err)
+
+
+
+
+
+
+
 #run until user exits
 while exit == False:
+
 
     # get user input
     inp = input("Enter a command. 'x' to exit.\n")
@@ -303,9 +359,11 @@ while exit == False:
             print("Error: invalid move. Piece already at target destination")
         elif error == 3:
             print("Error: invalid move. Pieces must move one space diagonally, or two when capturing")
+            print("Only king pieces may capture backwards.")
         elif error == 4:
             print("Error: invalid move. No opponent piece to capture")
-        
+
+
         #output board state
         printBoard(boardState)
 
