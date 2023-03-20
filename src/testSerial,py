@@ -10,7 +10,7 @@ ser = serial.Serial(
     baudrate=115200,
     timeout=1
 )
-
+s
 # Packet markers
 PACKET_START = 0x7E
 PACKET_END = 0x7F
@@ -32,15 +32,13 @@ def send_packet(joint1, joint2, state):
     ser.write(packet)
 
 def move_robot(joint1, joint2):
-    joint1_global = joint1
-    joint2_global = joint1
     send_packet(joint1, joint2, 0)
 
 def pickup(joint1, joint2):
     send_packet(joint1, joint2, 2)
 
 def drop(joint1, joint2):
-    send_packet(joint1, joint1, 4)
+    send_packet(joint1, joint2, 4)
 
 
 def read_serial():
@@ -72,7 +70,7 @@ def on_drop_button_click():
     try:
         joint1 = float(joint1_entry.get())
         joint2 = float(joint2_entry.get())
-        drop(joint1, joint2 )
+        drop(joint1, joint2)
     except ValueError:
         print("drop error")
 

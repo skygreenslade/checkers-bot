@@ -57,6 +57,7 @@ MeMegaPiDCMotor motor2(PORT1A);
 MeEncoderOnBoard Encoder_1(SLOT1);
 MeEncoderOnBoard Encoder_2(SLOT2);
 MeEncoderOnBoard Encoder_3(SLOT3);
+MeMegaPiDCMotor Gripper(PORT4B);            // indeed
 
 volatile long encoder_pos1 = 0;
 volatile long encoder_pos2 = 0;
@@ -91,9 +92,6 @@ enum bot_states{
   DROP_ROUTINE = 4
 };
 bot_states bot_state = RECEIVING_MESSAGE;
-
-
-
 
 
 void isr_process_encoder1(void)
@@ -354,6 +352,10 @@ void updateDropRoutine(){
       // Move to gripping state
 
       Serial.println("LOWERED_RELEASED");
+      Gripper.run(-250);
+      Encoder_3.setMotorPwm(0);
+      delay(900);
+      Gripper.run(0);
 
       arm = LOWERED_RELEASED;   // trigger this once gripped
 
@@ -412,6 +414,10 @@ void updatePickupRoutine(){
       // Move to gripping state
 
       Serial.println("LOWERED_RELEASED");
+      Gripper.run(250);
+      Encoder_3.setMotorPwm(0);
+      delay(900);
+      Gripper.run(0);
 
       arm = LOWERED_GRIPPING;   // trigger this once gripped
 
@@ -480,7 +486,7 @@ void setup()
   Serial.print("Third motor spinning");
 
   waitForButtonState(0);
-  Encoder_3.setMotorPwm(-45);
+  Encoder_3.setMotorPwm(45);
   waitForButtonState(1);
   Encoder_3.setMotorPwm(0);
 
