@@ -12,8 +12,8 @@ LENGTH = 40 #side length of square
 A1CENTER = (86+12 + LENGTH/2, 0 + LENGTH/2) #center of A1 square on x-axis
 
 #lengths of arms in mm
-ARM_1 = 355
-ARM_2 = 254
+ARM_1 = 348
+ARM_2 = 245
 
 
 
@@ -123,12 +123,39 @@ def convertRad(thetas):
 #convertRad
 
 
+
+
 def wait_for_arduino():
     arduino_ready = False
     while arduino_ready is not True:
         arduino_ready = testSerial.read_serial()
 
     print("Arduino Ready!")
+    
+#wait_for_arduino
+
+
+
+
+#executes the commands for a move from thetas1 to thetas2
+def movePiece(thetas1, thetas2):
+
+    testSerial.move_robot(float(thetas1[0]), float(thetas1[1]))
+    wait_for_arduino()
+    time.sleep(1)
+    testSerial.pickup(float(thetas1[0]), float(thetas1[1]))
+    wait_for_arduino()
+    time.sleep(1)
+    testSerial.move_robot(float(thetas2[0]), float(thetas2[1]))
+    wait_for_arduino()
+    time.sleep(1)
+    testSerial.drop(float(thetas2[0]), float(thetas2[1]))
+    wait_for_arduino()
+    time.sleep(1)
+#movePiece
+
+
+
 
 
 ############################ main #############################
@@ -187,21 +214,11 @@ while not exit:
         print(thetas1[0]/math.pi, thetas1[1]/math.pi, thetas2[0]/math.pi, thetas2[1]/math.pi)
         # print(thetas1, thetas2)
 
+        #convert thetas to appropriate values
         thetas1 = convertRad(thetas1)   
         thetas2 = convertRad(thetas2)
-
-        testSerial.move_robot(float(thetas1[0]), float(thetas1[1]))
-        wait_for_arduino()
-        time.sleep(1)
-        testSerial.pickup(float(thetas1[0]), float(thetas1[1]))
-        wait_for_arduino()
-        time.sleep(1)
-        testSerial.move_robot(float(thetas2[0]), float(thetas2[1]))
-        wait_for_arduino()
-        time.sleep(1)
-        testSerial.drop(float(thetas2[0]), float(thetas2[1]))
-        wait_for_arduino()
-        time.sleep(1)
+        
+        movePiece(thetas1, thetas2)
 
 
 print("\nProgram completed normally. Exiting.\n")
