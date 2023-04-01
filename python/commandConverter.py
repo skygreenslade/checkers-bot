@@ -120,7 +120,23 @@ def convertRad(thetas):
 
 
 
+#executes the commands for a move from thetas1 to thetas2
+def movePiece(thetas1, thetas2):
 
+    #move over position1
+    move_robot(thetas1[0], thetas1[1])
+
+    #grab piece
+    pickup(thetas1[0], thetas1[1])
+
+    #move over position2
+    move_robot(thetas1[0], thetas1[1])
+
+    #release piece
+    drop(thetas1[0], thetas1[1])
+
+
+#movePiece
 
 
 
@@ -181,8 +197,14 @@ while not exit:
         print(thetas1[0]/math.pi, thetas1[1]/math.pi, thetas2[0]/math.pi, thetas2[1]/math.pi)
         # print(thetas1, thetas2)
 
+        #convert thetas to appropriate values
         thetas1 = convertRad(thetas1)   
         thetas2 = convertRad(thetas2)
+
+        #send new commands
+        movePiece(thetas1, thetas2)
+
+
 
 print("\nProgram completed normally. Exiting.\n")
 #main
