@@ -13,7 +13,7 @@ A1CENTER = (86+12 + LENGTH/2, 0 + LENGTH/2) #center of A1 square on x-axis
 
 #lengths of arms in mm
 ARM_1 = 348
-ARM_2 = 245
+ARM_2 = 240
 
 
 
@@ -217,7 +217,7 @@ while not exit:
         #convert thetas to appropriate values
         thetas1 = convertRad(thetas1)   
         thetas2 = convertRad(thetas2)
-        
+
         movePiece(thetas1, thetas2)
 
 
