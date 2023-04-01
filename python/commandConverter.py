@@ -6,7 +6,7 @@ import math
 #FIFO path
 fifoPath = "../moves"
 
-#LENGTHances in mm
+#distances in mm
 LENGTH = 40 #side length of square 
 A1CENTER = (150 + LENGTH/2, -30 + LENGTH/2) #center of A1 square on x-axis
 
@@ -55,16 +55,23 @@ def getCol(letter):
 
     col = None
 
-    #convert to int, subtract one for 0 based indexing
-    try:
-        col = int(letter) - 1
-    except:
-        pass
+    if letter == '1':
+        col = 0
+    elif letter == '2':
+        col = 1
+    elif letter == '3':
+        col = 2
+    elif letter == '4':
+        col = 3
+    elif letter == '5':
+        col = 4
+    elif letter == '6':
+        col = 5
+    elif letter == '7':
+        col = 6
+    elif letter == '8':
+        col = 7
 
-    # set to Null if out of bounds
-    if (not isinstance(col, int)) or col > 8 or col < 0:
-        col = None
-    
     return col
 #getCol
 
@@ -77,16 +84,22 @@ def invKin(coordinates):
     y = coordinates[1]
     
     #top and bottom term for theta 2 calculation
-    topTerm = x**2 + y**2 - ARM_1**2 - ARM_2**2
+    topTerm = (x**2) + (y**2) - (ARM_1**2) - (ARM_2**2)
     bottomTerm = 2*ARM_1*ARM_2
 
+    #calculate theta 2
     t2 = math.acos(topTerm/bottomTerm)
 
     #top and bottom term for theta 1 calculation
     topTerm = ARM_2*math.sin(t2)
     bottomTerm = (ARM_1+(ARM_2*math.cos(t2)))
     
-    t1 = math.atan(y/x)-math.atan(topTerm/bottomTerm)
+    #calculat theta 1
+    t1 = math.atan(y/x) + math.atan(topTerm/bottomTerm)
+
+    #use positive version of negative theta 1
+    # if t1< 0:
+    #     t1 = 2*math.pi + t1
 
     return(t1, t2)
 #invKin
@@ -142,13 +155,15 @@ while not exit:
         oldCol = getCol(oldPos[1])
         newCol = getCol(newPos[1])
 
-        #calculate cordinates of each position
+        #calculate x,y cordinates of each position
         pos1 = (oldCol*LENGTH + A1CENTER[1], oldRow*LENGTH + A1CENTER[0])
         pos2 = (newCol*LENGTH + A1CENTER[1], newRow*LENGTH + A1CENTER[0])
 
+        #calculate thetas for each position
         thetas1 = invKin(pos1)
         thetas2 = invKin(pos2)
 
+        print(oldCol*LENGTH + A1CENTER[1], " ", oldRow*LENGTH + A1CENTER[0])
 
         print(thetas1[0]*180/math.pi, thetas1[1]*180/math.pi, thetas2[0]*180/math.pi, thetas2[1]*180/math.pi)
 
