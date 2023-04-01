@@ -10,7 +10,7 @@ ser = serial.Serial(
     baudrate=115200,
     timeout=1
 )
-s
+
 # Packet markers
 PACKET_START = 0x7E
 PACKET_END = 0x7F
@@ -32,13 +32,13 @@ def send_packet(joint1, joint2, state):
     ser.write(packet)
 
 def move_robot(joint1, joint2):
-    send_packet(joint1, joint2, 0)
+    send_packet(joint1, joint2, 0)              # send a packet with nothing
 
 def pickup(joint1, joint2):
-    send_packet(joint1, joint2, 2)
+    send_packet(joint1, joint2, 2)              # pickup state = 2
 
 def drop(joint1, joint2):
-    send_packet(joint1, joint2, 4)
+    send_packet(joint1, joint2, 4)              # drop state = 4
 
 
 def read_serial():
