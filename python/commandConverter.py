@@ -8,7 +8,7 @@ fifoPath = "../moves"
 
 #distances in mm
 LENGTH = 40 #side length of square 
-A1CENTER = (150 + LENGTH/2, -30 + LENGTH/2) #center of A1 square on x-axis
+A1CENTER = (86+12 + LENGTH/2, 0 + LENGTH/2) #center of A1 square on x-axis
 
 #lengths of arms in mm
 ARM_1 = 355
@@ -88,18 +88,20 @@ def invKin(coordinates):
     bottomTerm = 2*ARM_1*ARM_2
 
     #calculate theta 2
-    t2 = math.acos(topTerm/bottomTerm)
+    t2 = -math.acos(topTerm/bottomTerm)
 
     #top and bottom term for theta 1 calculation
-    topTerm = ARM_2*math.sin(t2)
-    bottomTerm = (ARM_1+(ARM_2*math.cos(t2)))
+    # topTerm = ARM_2*math.sin(t2)
+    # bottomTerm = (ARM_1+(ARM_2*math.cos(t2)))
     
     #calculat theta 1
-    t1 = math.atan(y/x) + math.atan(topTerm/bottomTerm)
+    # t1 = math.atan(y/x) + math.atan(topTerm/bottomTerm)
 
-    #use positive version of negative theta 1
-    # if t1< 0:
-    #     t1 = 2*math.pi + t1
+    topTerm = (x**2) + (y**2) + (ARM_1**2) - (ARM_2**2)
+    bottomTerm = (2 * math.sqrt((x**2)+(y**2)) * ARM_1)
+
+    t1 = math.atan(y/x) + math.atan(topTerm/bottomTerm) 
+
 
     return(t1, t2)
 #invKin
@@ -163,10 +165,11 @@ while not exit:
         thetas1 = invKin(pos1)
         thetas2 = invKin(pos2)
 
-        print(oldCol*LENGTH + A1CENTER[1], " ", oldRow*LENGTH + A1CENTER[0])
+        print(pos1)
 
-        print(thetas1[0]*180/math.pi, thetas1[1]*180/math.pi, thetas2[0]*180/math.pi, thetas2[1]*180/math.pi)
-
+        # print(thetas1[0]*180/math.pi, thetas1[1]*180/math.pi, thetas2[0]*180/math.pi, thetas2[1]*180/math.pi)
+        print(thetas1[0]/math.pi, thetas1[1]/math.pi, thetas2[0]/math.pi, thetas2[1]/math.pi)
+        # print(thetas1, thetas2)
 
 print("\nProgram completed normally. Exiting.\n")
 #main
