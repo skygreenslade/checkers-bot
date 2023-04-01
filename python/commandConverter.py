@@ -108,6 +108,16 @@ def invKin(coordinates):
 
 
 
+#changes radians angles to those expected by the arduino
+def convertRad(thetas):
+
+    t1 = math.pi - thetas[1]
+    t2 = -thetas[2]
+
+    return (t1, t2)
+
+#convertRad
+
 
 
 
@@ -170,6 +180,9 @@ while not exit:
         # print(thetas1[0]*180/math.pi, thetas1[1]*180/math.pi, thetas2[0]*180/math.pi, thetas2[1]*180/math.pi)
         print(thetas1[0]/math.pi, thetas1[1]/math.pi, thetas2[0]/math.pi, thetas2[1]/math.pi)
         # print(thetas1, thetas2)
+
+        thetas1 = convertRad(thetas1)   
+        thetas2 = convertRad(thetas2)
 
 print("\nProgram completed normally. Exiting.\n")
 #main
