@@ -122,6 +122,8 @@ def convertRad(thetas):
 #convertRad
 
 
+
+
 def wait_for_arduino():
     while testSerial.arduino_ready is not True:
             pass
@@ -131,23 +133,30 @@ def wait_for_arduino():
 #wait_for_arduino
 
 
+
+
 #executes the commands for a move from thetas1 to thetas2
 def movePiece(thetas1, thetas2):
 
-    #move over position1
-    move_robot(thetas1[0], thetas1[1])
+    #move over position 1
+    testSerial.move_robot(float(thetas1[0]), float(thetas1[1]))
+    wait_for_arduino()
 
-    #grab piece
-    pickup(thetas1[0], thetas1[1])
+    #pick up piece
+    testSerial.pickup(float(thetas1[0]), float(thetas1[1]))
+    wait_for_arduino()
 
-    #move over position2
-    move_robot(thetas1[0], thetas1[1])
+    #move ove position 2
+    testSerial.move_robot(float(thetas2[0]), float(thetas2[1]))
+    wait_for_arduino()
 
-    #release piece
-    drop(thetas1[0], thetas1[1])
-
+    #place piece
+    testSerial.drop(float(thetas2[0]), float(thetas2[1]))
+    wait_for_arduino()
 
 #movePiece
+
+
 
 
 
@@ -211,14 +220,9 @@ while not exit:
         thetas1 = convertRad(thetas1)   
         thetas2 = convertRad(thetas2)
 
-        testSerial.move_robot(float(thetas1[0]), float(thetas1[1]))
-        wait_for_arduino()
-        testSerial.pickup(float(thetas1[0]), float(thetas1[1]))
-        wait_for_arduino()
-        testSerial.move_robot(float(thetas2[0]), float(thetas2[1]))
-        wait_for_arduino()
-        testSerial.drop(float(thetas2[0]), float(thetas2[1]))
-        wait_for_arduino()
+
+        movePiece(thetas1, thetas2)
+
 
 print("\nProgram completed normally. Exiting.\n")
 #main
