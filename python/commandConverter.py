@@ -1,7 +1,7 @@
 
 
 import math
-
+import testSerial
 
 #FIFO path
 fifoPath = "../moves"
@@ -111,18 +111,22 @@ def invKin(coordinates):
 #changes radians angles to those expected by the arduino
 def convertRad(thetas):
 
-    t1 = math.pi - thetas[1]
-    t2 = -thetas[2]
+    t1 = math.pi - thetas[0]
+    t2 = -thetas[1]
+
+    t1 = 180*t1/math.pi
+    t2 = 180*t2/math.pi
 
     return (t1, t2)
 
 #convertRad
 
 
+def wait_for_arduino():
+    while testSerial.arduino_ready is not True:
+            pass
 
-
-
-
+    print("Arduino Ready!")
 
 
 ############################ main #############################
@@ -183,6 +187,15 @@ while not exit:
 
         thetas1 = convertRad(thetas1)   
         thetas2 = convertRad(thetas2)
+
+        testSerial.move_robot(float(thetas1[0]), float(thetas1[1]))
+        wait_for_arduino()
+        testSerial.pickup(float(thetas1[0]), float(thetas1[1]))
+        wait_for_arduino()
+        testSerial.move_robot(float(thetas2[0]), float(thetas2[1]))
+        wait_for_arduino()
+        testSerial.drop(float(thetas2[0]), float(thetas2[1]))
+        wait_for_arduino()
 
 print("\nProgram completed normally. Exiting.\n")
 #main

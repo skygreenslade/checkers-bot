@@ -11,6 +11,9 @@ ser = serial.Serial(
     timeout=1
 )
 
+# Arduino Ready
+arduino_ready = False
+
 # Packet markers
 PACKET_START = 0x7E
 PACKET_END = 0x7F
@@ -19,6 +22,7 @@ joint1_global = 0
 joint2_global = 0
 
 def send_packet(joint1, joint2, state):
+    arduino_ready = False
     # Convert the float values to byte arrays
     joint1_bytes = struct.pack('<f', joint1)
     joint2_bytes = struct.pack('<f', joint2)
@@ -46,65 +50,65 @@ def read_serial():
         line = ser.readline()
         if line:
             try:
-                print(line.decode('ascii').strip())
+                string = line.decode('ascii').strip()
+                if string == "Waiting for message":
+                    arduino_ready = True                    
+
+                print(string)
+
             except UnicodeDecodeError:
                 print("Received binary data:", [hex(b) for b in line])
 
-def on_send_button_click():
-    try:
-        joint1 = float(joint1_entry.get())
-        joint2 = float(joint2_entry.get())
-        move_robot(joint1, joint2)
-    except ValueError:
-        print("Invalid input. Please enter valid joint angles.")
+# def on_send_button_click():
+#     try:
+#         joint1 = float(joint1_entry.get())
+#         joint2 = float(joint2_entry.get())
+#         move_robot(joint1, joint2)
+#     except ValueError:
+#         print("Invalid input. Please enter valid joint angles.")
 
-def on_pickup_button_click():
-    try:
-        joint1 = float(joint1_entry.get())
-        joint2 = float(joint2_entry.get())
-        pickup(joint1, joint2 )
-    except ValueError:
-        print("Pickup error")
+# def on_pickup_button_click():
+#     try:
+#         joint1 = float(joint1_entry.get())
+#         joint2 = float(joint2_entry.get())
+#         pickup(joint1, joint2 )
+#     except ValueError:
+#         print("Pickup error")
 
-def on_drop_button_click():
-    try:
-        joint1 = float(joint1_entry.get())
-        joint2 = float(joint2_entry.get())
-        drop(joint1, joint2)
-    except ValueError:
-        print("drop error")
+# def on_drop_button_click():
+#     try:
+#         joint1 = float(joint1_entry.get())
+#         joint2 = float(joint2_entry.get())
+#         drop(joint1, joint2)
+#     except ValueError:
+#         print("drop error")
 
 # Create a GUI for user input
-root = tk.Tk()
-root.title("Joint Angle Sender")
+# root = tk.Tk()
+# root.title("Joint Angle Sender")
 
-joint1_label = tk.Label(root, text="Joint 1 Angle (degrees):")
-joint1_label.grid(row=0, column=0, padx=10, pady=10)
-joint1_entry = tk.Entry(root)
-joint1_entry.grid(row=0, column=1)
+# joint1_label = tk.Label(root, text="Joint 1 Angle (degrees):")
+# joint1_label.grid(row=0, column=0, padx=10, pady=10)
+# joint1_entry = tk.Entry(root)
+# joint1_entry.grid(row=0, column=1)
 
-joint2_label = tk.Label(root, text="Joint 2 Angle (degrees):")
-joint2_label.grid(row=1, column=0, padx=10, pady=10)
-joint2_entry = tk.Entry(root)
-joint2_entry.grid(row=1, column=1)
+# joint2_label = tk.Label(root, text="Joint 2 Angle (degrees):")
+# joint2_label.grid(row=1, column=0, padx=10, pady=10)
+# joint2_entry = tk.Entry(root)
+# joint2_entry.grid(row=1, column=1)
 
-send_button = tk.Button(root, text="Send Angles", command=on_send_button_click)
-send_button.grid(row=2, column=0, columnspan=2, pady=10)
-pickup_button = tk.Button(root, text="Pickup", command=on_pickup_button_click)
-pickup_button.grid(row=3, column=0, columnspan=2, pady=5)
+# send_button = tk.Button(root, text="Send Angles", command=on_send_button_click)
+# send_button.grid(row=2, column=0, columnspan=2, pady=10)
+# pickup_button = tk.Button(root, text="Pickup", command=on_pickup_button_click)
+# pickup_button.grid(row=3, column=0, columnspan=2, pady=5)
 
-drop_button = tk.Button(root, text="Drop", command=on_drop_button_click)
-drop_button.grid(row=4, column=0, columnspan=2, pady=5)
+# drop_button = tk.Button(root, text="Drop", command=on_drop_button_click)
+# drop_button.grid(row=4, column=0, columnspan=2, pady=5)
 
 
 # Example usage
-if __name__ == "__main__":
-    # Start a thread for reading serial debug messages from the Arduino
-    read_thread = threading.Thread(target=read_serial)
-    read_thread.daemon = True
-    read_thread.start()
+# Start a thread for reading serial debug messages from the Arduino
+read_thread = threading.Thread(target=read_serial)
+read_thread.daemon = True
+read_thread.start()
 
-    root.mainloop()
-
-    # Close the serial port when exiting
-    ser.close()
