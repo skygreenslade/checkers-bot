@@ -11,8 +11,8 @@ LENGTH = 40 #side length of square
 A1CENTER = (86+12 + LENGTH/2, 0 + LENGTH/2) #center of A1 square on x-axis
 
 #lengths of arms in mm
-ARM_1 = 355
-ARM_2 = 254
+ARM_1 = 348
+ARM_2 = 245
 
 
 
