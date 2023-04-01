@@ -11,9 +11,6 @@ ser = serial.Serial(
     timeout=1
 )
 
-# Arduino Ready
-arduino_ready = False
-
 # Packet markers
 PACKET_START = 0x7E
 PACKET_END = 0x7F
@@ -52,9 +49,10 @@ def read_serial():
             try:
                 string = line.decode('ascii').strip()
                 if string == "Waiting for message":
-                    arduino_ready = True                    
-
-                print(string)
+                    print(string)
+                    return True      
+                else:
+                    print(string)
 
             except UnicodeDecodeError:
                 print("Received binary data:", [hex(b) for b in line])
@@ -108,7 +106,7 @@ def read_serial():
 
 # Example usage
 # Start a thread for reading serial debug messages from the Arduino
-read_thread = threading.Thread(target=read_serial)
-read_thread.daemon = True
-read_thread.start()
+# read_thread = threading.Thread(target=read_serial)
+# read_thread.daemon = True
+# read_thread.start()
 

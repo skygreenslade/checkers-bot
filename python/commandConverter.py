@@ -2,6 +2,7 @@
 
 import math
 import testSerial
+import time
 
 #FIFO path
 fifoPath = "../moves"
@@ -123,8 +124,9 @@ def convertRad(thetas):
 
 
 def wait_for_arduino():
-    while testSerial.arduino_ready is not True:
-            pass
+    arduino_ready = False
+    while arduino_ready is not True:
+        arduino_ready = testSerial.read_serial()
 
     print("Arduino Ready!")
 
@@ -190,12 +192,17 @@ while not exit:
 
         testSerial.move_robot(float(thetas1[0]), float(thetas1[1]))
         wait_for_arduino()
+        time.sleep(1)
         testSerial.pickup(float(thetas1[0]), float(thetas1[1]))
         wait_for_arduino()
+        time.sleep(1)
         testSerial.move_robot(float(thetas2[0]), float(thetas2[1]))
         wait_for_arduino()
+        time.sleep(1)
         testSerial.drop(float(thetas2[0]), float(thetas2[1]))
         wait_for_arduino()
+        time.sleep(1)
+
 
 print("\nProgram completed normally. Exiting.\n")
 #main
