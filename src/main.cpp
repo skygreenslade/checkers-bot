@@ -221,13 +221,14 @@ void waitForMessage(){
 
     if(data == PACKET_END){
       printBuffer();
-
+      #ifdef DEBUG
       Serial.print("Compare 1: ");
       Serial.println(buffer[(bufferIndex)], HEX);
       Serial.print("Compare 2: ");
       Serial.println(buffer[(bufferIndex - 10)], HEX);
       Serial.print("buffer index: ");
       Serial.println(bufferIndex);
+      #endif DEBUG
 
     }
    
@@ -486,14 +487,19 @@ void setup()
   Serial.print("Third motor spinning");
 
   waitForButtonState(0);
-  Encoder_3.setMotorPwm(45);
+  Encoder_3.setMotorPwm(-40);
   waitForButtonState(1);
   Encoder_3.setMotorPwm(0);
-
+  encoder_pos3 = 0;
+  target_joint_ticks3 = 25*PI/180*TICKS_PER_FULL_ROTATION_3;     // Set the 
+  while(!(encoder_pos3 < target_joint_ticks3+5 && encoder_pos3 > target_joint_ticks3-5)){
+    motor3_loop();
+  }
+  target_joint_ticks3 = 0;
   Serial.print("motors done");
 
-  encoder_pos1 = 0;
-  encoder_pos2 = PI*TICKS_PER_FULL_ROTATION_2;
+  encoder_pos1 = (long)-0.0872665*TICKS_PER_FULL_ROTATION_1;       // Starting offset of roughly 5 degrees
+  encoder_pos2 = (long) 3.66519142919*TICKS_PER_FULL_ROTATION_2;       // Starting offset of 6 deg
   encoder_pos3 = 0;
 }
 
