@@ -8,8 +8,9 @@ import time
 fifoPath = "../moves"
 
 #distances in mm
-LENGTH = 40 #side length of square 
-A1CENTER = (87+73 + LENGTH/2, 0 + LENGTH/2) #center of A1 square on x-axis
+LENGTHX = 40 #side length of square in x direction
+LENGTHY = 44 #side length of square in y direction
+A1CENTER = ( 0 + LENGTHX/2, 87+73 - 22 + LENGTHY/2) #center of A1 square on x-axis
 
 #lengths of arms in mm
 ARM_1 = 348
@@ -201,8 +202,8 @@ while not exit:
         newCol = getCol(newPos[1])
 
         #calculate x,y cordinates of each position
-        pos1 = (oldCol*LENGTH + A1CENTER[1], oldRow*LENGTH + A1CENTER[0])
-        pos2 = (newCol*LENGTH + A1CENTER[1], newRow*LENGTH + A1CENTER[0])
+        pos1 = (oldCol*LENGTHX + A1CENTER[0], oldRow*LENGTHY + A1CENTER[1])
+        pos2 = (newCol*LENGTHX + A1CENTER[0], newRow*LENGTHY + A1CENTER[1])
 
         #calculate thetas for each position
         thetas1 = invKin(pos1)
