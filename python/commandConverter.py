@@ -9,11 +9,11 @@ fifoPath = "../moves"
 
 #distances in mm
 LENGTH = 40 #side length of square 
-A1CENTER = (86+12 + LENGTH/2, 0 + LENGTH/2) #center of A1 square on x-axis
+A1CENTER = (87+73 + LENGTH/2, 0 + LENGTH/2) #center of A1 square on x-axis
 
 #lengths of arms in mm
 ARM_1 = 348
-ARM_2 = 240
+ARM_2 = 225
 
 
 
@@ -92,16 +92,16 @@ def invKin(coordinates):
     t2 = -math.acos(topTerm/bottomTerm)
 
     #top and bottom term for theta 1 calculation
-    # topTerm = ARM_2*math.sin(t2)
-    # bottomTerm = (ARM_1+(ARM_2*math.cos(t2)))
+    topTerm = ARM_2*math.sin(t2)
+    bottomTerm = (ARM_1+(ARM_2*math.cos(t2)))
     
     #calculat theta 1
-    # t1 = math.atan(y/x) + math.atan(topTerm/bottomTerm)
+    t1 = math.atan(y/x) - math.atan(topTerm/bottomTerm)
 
-    topTerm = (x**2) + (y**2) + (ARM_1**2) - (ARM_2**2)
-    bottomTerm = (2 * math.sqrt((x**2)+(y**2)) * ARM_1)
+    # topTerm = (x**2) + (y**2) + (ARM_1**2) - (ARM_2**2)
+    # bottomTerm = (2 * math.sqrt((x**2)+(y**2)) * ARM_1)
 
-    t1 = math.atan(y/x) + math.atan(topTerm/bottomTerm) 
+    # t1 = math.atan(y/x) + math.atan(topTerm/bottomTerm) 
 
 
     return(t1, t2)

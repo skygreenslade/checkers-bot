@@ -7,6 +7,11 @@
 #define SLOW_SPEED 40
 #define DEBUG
 
+
+#define OFFSET_1                      -23           // Radians offset at start
+#define OFFSET_2_1                    1345          // Dang    (Long conversion not working?)
+#define OFFSET_2                      1345          // Dang    (Long conversion not working?)
+
 #define TICKS_PER_FULL_ROTATION_2   2576/(2*PI)
 #define TICKS_PER_FULL_ROTATION_1   3312/(2*PI)
 #define TICKS_PER_FULL_ROTATION_3   5400/(2*PI)
@@ -228,7 +233,7 @@ void waitForMessage(){
       Serial.println(buffer[(bufferIndex - 10)], HEX);
       Serial.print("buffer index: ");
       Serial.println(bufferIndex);
-      #endif DEBUG
+      #endif
 
     }
    
@@ -336,7 +341,7 @@ void updateDropRoutine(){
   {
     case RAISED_GRIPPING:
       // Code to move it to lowered state
-      target_joint_ticks3 = -25*PI/180*TICKS_PER_FULL_ROTATION_3;
+      target_joint_ticks3 = -15*PI/180*TICKS_PER_FULL_ROTATION_3;
       Serial.print(encoder_pos3);
       Serial.print(" ");
       Serial.println(target_joint_ticks3);
@@ -398,7 +403,7 @@ void updatePickupRoutine(){
   {
     case RAISED_RELEASED:
       // Code to move it to lowered state
-      target_joint_ticks3 = -25*PI/180*TICKS_PER_FULL_ROTATION_3;
+      target_joint_ticks3 = -19*PI/180*TICKS_PER_FULL_ROTATION_3;
       Serial.print(encoder_pos3);
       Serial.print(" ");
       Serial.println(target_joint_ticks3);
@@ -498,8 +503,8 @@ void setup()
   target_joint_ticks3 = 0;
   Serial.print("motors done");
 
-  encoder_pos1 = (long)-0.0872665*TICKS_PER_FULL_ROTATION_1;       // Starting offset of roughly 5 degrees
-  encoder_pos2 = (long) 3.66519142919*TICKS_PER_FULL_ROTATION_2;       // Starting offset of 6 deg
+  encoder_pos1 = OFFSET_1;       // Starting offset of roughly 5 degrees
+  encoder_pos2 = OFFSET_2;       // Starting offset of 6 deg
   encoder_pos3 = 0;
 }
 
