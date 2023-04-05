@@ -156,7 +156,10 @@ def movePiece(thetas1, thetas2):
 #movePiece
 
 
-
+def returnHome():
+    testSerial.move_robot(45, 180)
+    #wait_for_arduino()
+    time.sleep(1)
 
 
 ############################ main #############################
@@ -220,6 +223,10 @@ while not exit:
         thetas2 = convertRad(thetas2)
 
         movePiece(thetas1, thetas2)
+
+        returnHome()            # move the robot arm to a position off of the board
+
+
 
 
 print("\nProgram completed normally. Exiting.\n")
