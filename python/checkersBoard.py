@@ -76,20 +76,20 @@ def readBoard(boardFile):
 def writeBoard(board, boardFile):
 
     row = ""    #holds row to be printed
-    rowLetter = ord('H')    #letter to pre/append to each row
-    numRow = "   1  2  3  4  5  6  7  8"    # header and footer rows
+    rowNum = ord('8')    #number to pre/append to each row
+    letRow = "   A  B  C  D  E  F  G  H"    # header and footer rows
 
     #open file
     file = open(boardFile, "w")
 
     #print header row of numbers
-    file.write(numRow)
+    file.write(letRow)
     file.write("\n")
 
     #for each row
     for i in range(0,8):
         #add row letter to front of row
-        row = chr(rowLetter)+ ' '
+        row = chr(rowNum)+ ' '
 
         #for each position in row
         for j in range (0,8):
@@ -103,14 +103,14 @@ def writeBoard(board, boardFile):
                 row += convertPiece(board[i][j])
         
         #add row letter to end of row an print row
-        row += ' ' + chr(rowLetter)
+        row += ' ' + chr(rowNum)
         file.write(row)
         file.write("\n")
         #decremenmt row letter for next row
-        rowLetter -= 1
+        rowNum -= 1
     
     #bottom row of numbers  
-    file.write(numRow)
+    file.write(letRow)
     file.write("\n")
     
 #writeBoard
@@ -171,16 +171,16 @@ def convertFromPiece(piece):
 def printBoard(board):
 
     row = ""    #holds row to be printed
-    rowLetter = ord('H')    #letter to pre/append to each row
-    numRow = "   1  2  3  4  5  6  7  8"    # header and footer rows
+    rowNum = ord('8')    #number to pre/append to each row
+    letRow = "   A  B  C  D  E  F  G  H"    # header and footer rows
 
     #print header row of numbers
-    print(numRow)
+    print(letRow)
 
     #for each row
     for i in range(0,8):
         #add row letter to front of row
-        row = chr(rowLetter)+ ' '
+        row = chr(rowNum)+ ' '
 
         #for each position in row
         for j in range (0,8):
@@ -194,63 +194,75 @@ def printBoard(board):
                 row += convertPiece(board[i][j])
         
         #add row letter to end of row an print row
-        row += ' ' + chr(rowLetter)
+        row += ' ' + chr(rowNum)
         print(row)
         #decremenmt row letter for next row
-        rowLetter -= 1
+        rowNum -= 1
     
     #bottom row of numbers  
-    print(numRow)
+    print(letRow)
 
 #printBoard
 
 
-#returns int of row corresponding to the letter given
+
+
+#returns int of col corresponding to the letter given
+#returns None on invalid input
+def getCol(letter):
+
+    col= None
+
+    if letter == 'H' or letter == 'h':
+        col= 7
+    elif letter == 'G' or letter == 'g':
+        col= 6
+    elif letter == 'F' or letter == 'f':
+        col= 5
+    elif letter == 'E' or letter == 'e':
+        col= 4
+    elif letter == 'D' or letter == 'd':
+        col= 3
+    elif letter == 'C' or letter == 'c':
+        col= 2
+    elif letter == 'B' or letter == 'b':
+        col= 1
+    elif letter == 'A' or letter == 'a':
+        col= 0
+
+
+    return col
+#getCol
+
+
+
+
+#returns int of row corresponding to the number system
 #returns None on invalid input
 def getRow(letter):
 
     row = None
 
-    if letter == 'H' or letter == 'h':
+    if letter == '8':
         row = 0
-    elif letter == 'G' or letter == 'g':
+    if letter == '7':
         row = 1
-    elif letter == 'F' or letter == 'f':
+    if letter == '6':
         row = 2
-    elif letter == 'E' or letter == 'e':
+    if letter == '5':
         row = 3
-    elif letter == 'D' or letter == 'd':
+    if letter == '4':
         row = 4
-    elif letter == 'C' or letter == 'c':
+    if letter == '3':
         row = 5
-    elif letter == 'B' or letter == 'b':
+    if letter == '2':
         row = 6
-    elif letter == 'A' or letter == 'a':
+    if letter == '1':
         row = 7
-
-
-    return row
-#getRow
-
-
-#returns int of column corresponding to the number system
-#returns None on invalid input
-def getCol(letter):
-
-    col = None
-
-    #convert to int, subtract one for 0 based indexing
-    try:
-        col = int(letter) - 1
-    except:
-        pass
-
-    # set to Null if out of bounds
-    if (not isinstance(col, int)) or col > 8 or col < 0:
-        col = None
     
-    return col
-#getCol
+    return row
+
+#getRow
 
 
 #moves piece at oldPos to newPos on given board (if movement is valid)
@@ -270,10 +282,10 @@ def move(oldPos, newPos, board):
     #ensure arguments are long enough
     if len(oldPos) > 1 and len(newPos) > 1: 
         #convert given positions into array indices
-        oldRow = getRow(oldPos[0])
-        newRow = getRow(newPos[0])
-        oldCol = getCol(oldPos[1])
-        newCol = getCol(newPos[1])
+        oldRow = getRow(oldPos[1])
+        newRow = getRow(newPos[1])
+        oldCol = getCol(oldPos[0])
+        newCol = getCol(newPos[0])
 
     #check that given values were valid
     if oldRow is None or oldCol is None or oldCol is None or newCol is None:

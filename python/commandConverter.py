@@ -23,59 +23,62 @@ ARM_2 = 225 - 5    #was 225
 ########################### FUNCTIONS ############################
 
 
-#returns int of row corresponding to the letter given
+#returns int of col corresponding to the letter given
+#returns None on invalid input
+def getCol(letter):
+
+    col= None
+
+    if letter == 'H' or letter == 'h':
+        col= 7
+    elif letter == 'G' or letter == 'g':
+        col= 6
+    elif letter == 'F' or letter == 'f':
+        col= 5
+    elif letter == 'E' or letter == 'e':
+        col= 4
+    elif letter == 'D' or letter == 'd':
+        col= 3
+    elif letter == 'C' or letter == 'c':
+        col= 2
+    elif letter == 'B' or letter == 'b':
+        col= 1
+    elif letter == 'A' or letter == 'a':
+        col= 0
+
+
+    return col
+#getCol
+
+
+
+
+#returns int of row corresponding to the number system
 #returns None on invalid input
 def getRow(letter):
 
     row = None
 
-    if letter == 'H' or letter == 'h':
-        row = 7
-    elif letter == 'G' or letter == 'g':
-        row = 6
-    elif letter == 'F' or letter == 'f':
-        row = 5
-    elif letter == 'E' or letter == 'e':
-        row = 4
-    elif letter == 'D' or letter == 'd':
-        row = 3
-    elif letter == 'C' or letter == 'c':
-        row = 2
-    elif letter == 'B' or letter == 'b':
-        row = 1
-    elif letter == 'A' or letter == 'a':
+    if letter == '8':
         row = 0
-
-
-    return row
-#getRow
-
-
-#returns int of column corresponding to the number system
-#returns None on invalid input
-def getCol(letter):
-
-    col = None
-
+    if letter == '7':
+        row = 1
+    if letter == '6':
+        row = 2
+    if letter == '5':
+        row = 3
+    if letter == '4':
+        row = 4
+    if letter == '3':
+        row = 5
+    if letter == '2':
+        row = 6
     if letter == '1':
-        col = 0
-    elif letter == '2':
-        col = 1
-    elif letter == '3':
-        col = 2
-    elif letter == '4':
-        col = 3
-    elif letter == '5':
-        col = 4
-    elif letter == '6':
-        col = 5
-    elif letter == '7':
-        col = 6
-    elif letter == '8':
-        col = 7
+        row = 7
+    
+    return row
 
-    return col
-#getCol
+#getRow
 
 
 
@@ -196,10 +199,10 @@ while not exit:
         newPos = params[2]
 
 
-        oldRow = getRow(oldPos[0])
-        newRow = getRow(newPos[0])
-        oldCol = getCol(oldPos[1])
-        newCol = getCol(newPos[1])
+        oldRow = getRow(oldPos[1])
+        newRow = getRow(newPos[1])
+        oldCol = getCol(oldPos[0])
+        newCol = getCol(newPos[0])
 
         #calculate x,y cordinates of each position
         pos1 = (oldCol*LENGTHX + A1CENTER[0], oldRow*LENGTHY + A1CENTER[1])
