@@ -527,8 +527,6 @@ void loop()
         Serial.println(target_joint_ticks2);
         #endif
 
-
-
         if(joint1_complete && joint2_complete){
           bot_state = RECEIVING_MESSAGE;
           joint1_complete = false;              // reset flags
