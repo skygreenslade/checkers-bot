@@ -12,19 +12,11 @@ import os, sys #FIFOs
 fifoPath = "../moves"
 fifo = None     #holds fd for fifo
 
+#file which holds board state
+boardFile = "./boardState.ini" 
 
 
 # top of board is away from robot
-boardState = [[0, 3, 0, 3, 0, 3, 0, 3],
-              [3, 0, 3, 0, 3, 0, 3, 0],
-              [0, 3, 0, 3, 0, 3, 0, 3],
-              [0, 0, 0, 0, 0, 0, 0, 0],
-              [0, 0, 0, 0, 0, 0, 0, 0],
-              [2, 0, 2, 0, 2, 0, 2, 0],
-              [0, 2, 0, 2, 0, 2, 0, 2],
-              [2, 0, 2, 0, 2, 0, 2, 0]]
-
-
 newBoard =   [[0, 3, 0, 3, 0, 3, 0, 3],
               [3, 0, 3, 0, 3, 0, 3, 0],
               [0, 3, 0, 3, 0, 3, 0, 3],
@@ -38,6 +30,95 @@ newBoard =   [[0, 3, 0, 3, 0, 3, 0, 3],
 
 
 #################### functions ########################
+
+
+
+#read board state from file and return it as board matrix
+def readBoard(boardFile):
+
+    newState = newBoard
+    newRow = 0 #position for new board
+    newCol = -1 #position ofr new board
+
+    #read in board file
+    file = open(boardFile, "r")
+    state = file.read()
+    nextChar = state[1]
+
+    #parse for checkers positions
+    for i in range(0,len(state)-1):
+        char = state[i]
+        nextChar = state[i+1]
+        
+        #next checkers position reached
+        if char == '[':
+            #move to next square
+            newCol+=2
+            if newCol == 9:
+                newRow += 1
+                newCol = 0
+            elif newCol == 8:
+                newRow += 1
+                newCol = 1
+            
+            #update board state
+            newState[newRow][newCol] = convertFromPiece(nextChar)
+        
+    return newState
+
+#readBoard
+
+
+
+
+
+#write board state to given file boardFile
+def writeBoard(board, boardFile):
+
+    row = ""    #holds row to be printed
+    rowLetter = ord('H')    #letter to pre/append to each row
+    numRow = "   1  2  3  4  5  6  7  8"    # header and footer rows
+
+    #open file
+    file = open(boardFile, "w")
+
+    #print header row of numbers
+    file.write(numRow)
+    file.write("\n")
+
+    #for each row
+    for i in range(0,8):
+        #add row letter to front of row
+        row = chr(rowLetter)+ ' '
+
+        #for each position in row
+        for j in range (0,8):
+
+            #unused spaces are blank
+            if ((j+i)%2) == 0:
+                row += "   "
+
+            #add appropriate character to each space
+            else:
+                row += convertPiece(board[i][j])
+        
+        #add row letter to end of row an print row
+        row += ' ' + chr(rowLetter)
+        file.write(row)
+        file.write("\n")
+        #decremenmt row letter for next row
+        rowLetter -= 1
+    
+    #bottom row of numbers  
+    file.write(numRow)
+    file.write("\n")
+    
+#writeBoard
+
+
+
+
+
 
 
 #converts given character into approporiate piece
@@ -60,6 +141,28 @@ def convertPiece(piece):
     return toRet
 
 #convertPiece
+
+
+
+
+#converts piece into code
+# r, R into 2, 22. o, O into 3, 33. blank into 0
+def convertFromPiece(piece):
+
+    toRet = 0
+
+    if piece == 'r':
+        toRet = 2
+    if piece == 'R':
+        toRet = 22
+    if piece == 'o':
+        toRet = 3
+    if piece == 'O':
+        toRet = 33
+    
+    return toRet
+
+#convertFromPiece
 
 
 
@@ -309,6 +412,8 @@ new = input("Press '0' for new board\n")
 
 if new == '0':
     boardState = newBoard
+else:
+    boardState = readBoard(boardFile)
     
 printBoard(boardState)
 
@@ -366,6 +471,9 @@ while exit == False:
 
         #output board state
         printBoard(boardState)
+
+        #update board file with new state
+        writeBoard(newBoard, boardFile)
 
 
 
