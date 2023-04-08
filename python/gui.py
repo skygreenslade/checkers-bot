@@ -512,7 +512,7 @@ def printBoard(board):
         rowNum -= 1
     
     #bottom row of numbers  
-    print(letRow)
+    print(letRow) 
 
 #printBoard
 
@@ -541,7 +541,7 @@ def selectPiece(event):
     global validPiece
     global finalPos
 
-    #detemine aray indices
+    #detemine array indices
     col = event.x//SQUARE_SIZE
     row = event.y//SQUARE_SIZE
 
@@ -588,10 +588,11 @@ def releasePiece(event):
         validPiece = False
 
         #check if move was valid
-        error = move(pieceToMove, finalPos)
+        if (0 <= int(finalPos[0]) < 8) and (0 <= int(finalPos[1]) < 8):
+            error = move(pieceToMove, finalPos)
 
-        if not error:
-            writeBoard(boardFile)
+            if not error:
+                writeBoard(boardFile)
 
         #update board state and file
         boardState = readBoard(boardFile)
