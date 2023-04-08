@@ -607,23 +607,25 @@ def calibrate():
     global calib
     calib = tk.Tk()
     calib.title("Checkers Bot Calibration")
-    calib.geometry("400x400")
+
+    label = tk.Label(master=calib, text="Select a calibration command")
+    label.grid(row=0, columnspan=2, padx=10, pady=10)
 
     #add buttons for calibration commands
+    buttonA = tk.Button(master=calib, text="Column A", command=lambda: oputMove("mv A1 A8\n"), width=9)
+    buttonH = tk.Button(master=calib, text="Column H",  command=lambda: oputMove("mv H1 H8\n"), width=9)
+    button1 = tk.Button(master=calib, text="Row 1",  command=lambda: oputMove("mv A1 H1\n"), width=9)
+    button8 = tk.Button(master=calib, text="Row 8",  command=lambda: oputMove("mv A8 H8\n"), width=9)
 
-    buttonA = tk.Button(master=calib, text="Column A", command=lambda: oputMove("mv A1 A8\n"))
-    buttonA.pack()
-    buttonH = tk.Button(master=calib, text="Column H",  command=lambda: oputMove("mv H1 H8\n"))
-    buttonH.pack()
-    button1 = tk.Button(master=calib, text="Row 1",  command=lambda: oputMove("mv A1 H1\n"))
-    button1.pack()
-    button8 = tk.Button(master=calib, text="Row 8",  command=lambda: oputMove("mv A8 H8\n"))
-    button8.pack()
 
+    buttonA.grid(row=1, column=0, padx=20, pady=10)
+    buttonH.grid(row=2, column=0, padx=20, pady=10)
+    button1.grid(row=1, column=1, padx=20, pady=10)
+    button8.grid(row=2, column=1, padx=20, pady=10)
 
 
     buttonExit = tk.Button(master=calib, text="Exit Calibration", command=exitCalib)
-    buttonExit.pack()
+    buttonExit.grid(row=4, columnspan=2, padx=5, pady=15)
 
     #loop until exit
     calib.mainloop()
