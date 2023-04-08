@@ -326,21 +326,21 @@ def invGetRow(letter):
     row = None
 
     if letter == 0:
-        row = '8'
-    if letter == 1:
-        row = '7'
-    if letter == 2:
-        row = '6'
-    if letter == 3:
-        row = '5'
-    if letter == 4:
-        row = '4'
-    if letter == 5:
-        row = '3'
-    if letter == 6:
-        row = '2'
-    if letter == 7:
         row = '1'
+    if letter == 1:
+        row = '2'
+    if letter == 2:
+        row = '3'
+    if letter == 3:
+        row = '4'
+    if letter == 4:
+        row = '5'
+    if letter == 5:
+        row = '6'
+    if letter == 6:
+        row = '7'
+    if letter == 7:
+        row = '8'
     
     return row
 
@@ -465,15 +465,15 @@ def move(oldPos, newPos):
             boardState[newRow][newCol]*=11
 
         #convert given indices into move command format
-        oldPos[1] = invGetRow(oldPos[1])
-        newPos[1] = invGetRow(newPos[1])
-        oldPos[0] = invGetCol(oldPos[0])
-        newPos[0] = invGetCol(newPos[0])
+        oldPos[1] = invGetCol(oldPos[1])
+        newPos[1] = invGetCol(newPos[1])
+        oldPos[0] = invGetRow(oldPos[0])
+        newPos[0] = invGetRow(newPos[0])
 
 
         #write to FIFO if move was a legal robot move
         if piece%3 != 0:
-            output = 'mv' + ' ' + oldPos[0] + oldPos[1] + ' ' + newPos[0] + newPos[1] + '\n'
+            output = 'mv' + ' ' + oldPos[1] + oldPos[0] + ' ' + newPos[1] + newPos[0] + '\n'
             oputMove(output)
             
 
