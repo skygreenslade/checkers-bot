@@ -542,21 +542,26 @@ def startWindow():
     #start window to select new or previous game
     start = tk.Tk()
     start.title("Checkers Board")
-    start.geometry("600x300")
+    # start.geometry("600x300")
 
     #text label
     text = tk.Label(master=start, text="Checkers Bot Controller")
-    text.pack(side=tk.TOP, ipady=50)
+    text.grid(row=0, columnspan=3, pady=50)
 
     #buttons for new/load game, calibrate
-    buttonNew = tk.Button(master=start, text="New Game", command=newGame)
-    buttonNew.pack(side=tk.LEFT, ipadx=20, ipady=20, expand=True)
+    buttonNew = tk.Button(master=start, text="New Game", command=newGame, width=10)
+    buttonNew.grid(row=1, column=0, padx=20, pady=20, ipady=20, ipadx=10)
 
-    buttonLoad = tk.Button(master=start, text="Load Game", command=loadGame)
-    buttonLoad.pack(side=tk.RIGHT, ipadx=20, ipady=20, expand=True)
+    buttonLoad = tk.Button(master=start, text="Load Game", command=loadGame, width=10)
+    buttonLoad.grid(row=1, column=1, padx=20, pady=20, ipady=20, ipadx=10)
 
-    buttonCalib = tk.Button(master=start, text="Calibrate", command=calibrate)
-    buttonCalib.pack(side=tk.BOTTOM, ipadx=20, ipady=20, expand=True)
+    buttonCalib = tk.Button(master=start, text="Calibrate", command=calibrate, width=10)
+    buttonCalib.grid(row=1, column=2, padx=20, pady=20, ipady=20, ipadx=10)
+
+    #padding
+    pad = tk.Frame(master=start)
+    pad.grid(row=3, pady=20)
+
 
     #run window until selection is made
     start.mainloop()
@@ -613,9 +618,9 @@ def calibrate():
 
     #add buttons for calibration commands
     buttonA = tk.Button(master=calib, text="Column A", command=lambda: oputMove("mv A1 A8\n"), width=9)
-    buttonH = tk.Button(master=calib, text="Column H",  command=lambda: oputMove("mv H1 H8\n"), width=9)
-    button1 = tk.Button(master=calib, text="Row 1",  command=lambda: oputMove("mv A1 H1\n"), width=9)
-    button8 = tk.Button(master=calib, text="Row 8",  command=lambda: oputMove("mv A8 H8\n"), width=9)
+    buttonH = tk.Button(master=calib, text="Column H", command=lambda: oputMove("mv H1 H8\n"), width=9)
+    button1 = tk.Button(master=calib, text="Row 1", command=lambda: oputMove("mv A1 H1\n"), width=9)
+    button8 = tk.Button(master=calib, text="Row 8", command=lambda: oputMove("mv A8 H8\n"), width=9)
 
 
     buttonA.grid(row=1, column=0, padx=20, pady=10)
