@@ -565,7 +565,7 @@ def movePiece(event):
 
     #move piece and record position
     if validPiece:
-        canvas.moveto(circles[pieceToMove[0]][pieceToMove[1]], event.x, event.y)
+        canvas.moveto(circles[pieceToMove[0]][pieceToMove[1]], event.x-(CIRCLE_SIZE/2), event.y-(CIRCLE_SIZE/2))
         finalPos[0] = event.y//SQUARE_SIZE
         finalPos[1] = event.x//SQUARE_SIZE
 
