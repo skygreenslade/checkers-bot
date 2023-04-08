@@ -658,13 +658,16 @@ except OSError as err:
 #start window to select new or previous game
 start = tk.Tk()
 start.title("Checkers Board")
-start.geometry(str(SQUARE_SIZE*6)+"x"+str(SQUARE_SIZE*4))
+start.geometry("600x300")
+
+text = tk.Label(master=start, text="Checkers Bot Controller")
+text.pack(side=tk.TOP, ipady=50)
 
 #buttons for new/load game
 buttonNew = tk.Button(master=start, text="New Game", command=newGame)
-buttonNew.pack()
+buttonNew.pack(side=tk.LEFT, ipadx=20, ipady=20, expand=True)
 buttonLoad = tk.Button(master=start, text="Load Game", command=loadGame)
-buttonLoad.pack()
+buttonLoad.pack(side=tk.RIGHT, ipadx=20, ipady=20, expand=True)
 
 
 start.mainloop()
