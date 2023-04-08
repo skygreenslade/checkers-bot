@@ -655,11 +655,15 @@ except OSError as err:
     print("Error opening file, %s", err)
 
 
+
+boardState = None
+
 #start window to select new or previous game
 start = tk.Tk()
 start.title("Checkers Board")
 start.geometry("600x300")
 
+#text label
 text = tk.Label(master=start, text="Checkers Bot Controller")
 text.pack(side=tk.TOP, ipady=50)
 
@@ -669,54 +673,52 @@ buttonNew.pack(side=tk.LEFT, ipadx=20, ipady=20, expand=True)
 buttonLoad = tk.Button(master=start, text="Load Game", command=loadGame)
 buttonLoad.pack(side=tk.RIGHT, ipadx=20, ipady=20, expand=True)
 
-
+#run window until selection is made
 start.mainloop()
 
 
 
 
 
-#open main window
-window = tk.Tk()
-window.title("Checkers Board")
-window.geometry(str(SQUARE_SIZE*8)+"x"+str(SQUARE_SIZE*8))
-
-#create canvas
-canvas = tk.Canvas(window, width=SQUARE_SIZE*8, height=SQUARE_SIZE*8)
-canvas.pack()
-
-#create grid
-grid = [[0 for i in range(0, 8)]for j in range(0, 8)]
-lightSquare = False
-for i in range (0, 8):
-    lightSquare = not lightSquare
-    for j in range(0, 8):
-        if lightSquare:
-            grid[i][j] = canvas.create_rectangle(SQUARE_SIZE*i, SQUARE_SIZE*j, SQUARE_SIZE*(i+1), SQUARE_SIZE*(j+1), fill=LIGHT_COLOUR, width=0)
-            lightSquare = False
-        else:
-            grid[i][j] = canvas.create_rectangle(SQUARE_SIZE*i, SQUARE_SIZE*j, SQUARE_SIZE*(i+1), SQUARE_SIZE*(j+1), fill=DARK_COLOUR, width=0)
-            lightSquare = True
+#if board state not defined (start window was closed), exit program
+if boardState is not None:
 
 
-#set up pieces
-circles = [[0 for i in range(0, 8)]for j in range(0, 8)]
-writeBoard(boardFile)
+    #open main window
+    window = tk.Tk()
+    window.title("Checkers Board")
+    window.geometry(str(SQUARE_SIZE*8)+"x"+str(SQUARE_SIZE*8))
 
-placePieces(circles, canvas)
+    #create canvas
+    canvas = tk.Canvas(window, width=SQUARE_SIZE*8, height=SQUARE_SIZE*8)
+    canvas.pack()
+
+    #create grid
+    grid = [[0 for i in range(0, 8)]for j in range(0, 8)]
+    lightSquare = False
+    for i in range (0, 8):
+        lightSquare = not lightSquare
+        for j in range(0, 8):
+            if lightSquare:
+                grid[i][j] = canvas.create_rectangle(SQUARE_SIZE*i, SQUARE_SIZE*j, SQUARE_SIZE*(i+1), SQUARE_SIZE*(j+1), fill=LIGHT_COLOUR, width=0)
+                lightSquare = False
+            else:
+                grid[i][j] = canvas.create_rectangle(SQUARE_SIZE*i, SQUARE_SIZE*j, SQUARE_SIZE*(i+1), SQUARE_SIZE*(j+1), fill=DARK_COLOUR, width=0)
+                lightSquare = True
 
 
+    #set up pieces
+    circles = [[0 for i in range(0, 8)]for j in range(0, 8)]
+    writeBoard(boardFile)
+    placePieces(circles, canvas)
 
-#bind mouse functions
-window.bind('<Button-1>', selectPiece)
-window.bind('<Motion>', movePiece)
-window.bind('<ButtonRelease-1>', releasePiece)
+    #bind mouse functions
+    window.bind('<Button-1>', selectPiece)
+    window.bind('<Motion>', movePiece)
+    window.bind('<ButtonRelease-1>', releasePiece)
 
-
-#loop
-window.mainloop()
-
-
+    #loop
+    window.mainloop()
 
 
 
