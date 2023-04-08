@@ -17,11 +17,11 @@ SQUARE_SIZE = 100
 CIRCLE_SIZE = SQUARE_SIZE*0.9
 CIRCLE_OFFSET = (SQUARE_SIZE - CIRCLE_SIZE)/2
 
-DARK_COLOUR = "grey10"#"saddle brown"
-LIGHT_COLOUR = "tan1"
-ROBOT_COLOUR = "sienna4"
+DARK_COLOUR = "sienna4"#"saddle brown"
+LIGHT_COLOUR = "#e3b776"#"tan1"
+ROBOT_COLOUR = "#24170c"
 OPPONENT_COLOUR = "wheat2"
-KING_COLOUR = 'gold'
+KING_COLOUR = '#ebc405'
 
 ROBOT_PIECE = 2
 ROBOT_KING = 22
@@ -537,6 +537,34 @@ def oputMove(toOput):
 
 
 
+def newGame():
+
+    global boardState
+    boardState = newBoard
+
+
+    start.destroy()
+#newGame
+
+
+
+
+
+def loadGame():
+
+
+    global boardState
+    boardState = readBoard(boardFile)
+
+
+    start.destroy()
+#loadGame
+
+
+
+
+
+
 
 
 def selectPiece(event):
@@ -627,10 +655,25 @@ except OSError as err:
     print("Error opening file, %s", err)
 
 
+#start window to select new or previous game
+start = tk.Tk()
+start.title("Checkers Board")
+start.geometry(str(SQUARE_SIZE*6)+"x"+str(SQUARE_SIZE*4))
+
+#buttons for new/load game
+buttonNew = tk.Button(master=start, text="New Game", command=newGame)
+buttonNew.pack()
+buttonLoad = tk.Button(master=start, text="Load Game", command=loadGame)
+buttonLoad.pack()
+
+
+start.mainloop()
 
 
 
-#open window
+
+
+#open main window
 window = tk.Tk()
 window.title("Checkers Board")
 window.geometry(str(SQUARE_SIZE*8)+"x"+str(SQUARE_SIZE*8))
@@ -641,7 +684,7 @@ canvas.pack()
 
 #create grid
 grid = [[0 for i in range(0, 8)]for j in range(0, 8)]
-lightSquare = True
+lightSquare = False
 for i in range (0, 8):
     lightSquare = not lightSquare
     for j in range(0, 8):
@@ -655,7 +698,6 @@ for i in range (0, 8):
 
 #set up pieces
 circles = [[0 for i in range(0, 8)]for j in range(0, 8)]
-boardState = newBoard
 writeBoard(boardFile)
 
 placePieces(circles, canvas)
