@@ -434,7 +434,8 @@ printBoard(boardState)
 try:
     os.mkfifo(fifoPath)
 except OSError as err:
-    print("Failed to create FIFO, %s" % err)
+    if err.errno != 17:
+        print("Failed to create FIFO, %s" % err)
 try:
     print("opening FIFO. Will wait for reader.")
     fifo = open(fifoPath, 'w', 1)
