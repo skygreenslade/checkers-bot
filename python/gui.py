@@ -535,13 +535,47 @@ def oputMove(toOput):
 
 
 
+def startWindow():
+
+    global start
+
+    #start window to select new or previous game
+    start = tk.Tk()
+    start.title("Checkers Board")
+    start.geometry("600x300")
+
+    #text label
+    text = tk.Label(master=start, text="Checkers Bot Controller")
+    text.pack(side=tk.TOP, ipady=50)
+
+    #buttons for new/load game, calibrate
+    buttonNew = tk.Button(master=start, text="New Game", command=newGame)
+    buttonNew.pack(side=tk.LEFT, ipadx=20, ipady=20, expand=True)
+
+    buttonLoad = tk.Button(master=start, text="Load Game", command=loadGame)
+    buttonLoad.pack(side=tk.RIGHT, ipadx=20, ipady=20, expand=True)
+
+    buttonCalib = tk.Button(master=start, text="Calibrate", command=calibrate)
+    buttonCalib.pack(side=tk.BOTTOM, ipadx=20, ipady=20, expand=True)
+
+    #run window until selection is made
+    start.mainloop()
+
+#startWindow
 
 
+
+
+
+
+
+#use new game board
 def newGame():
+
+    global start
 
     global boardState
     boardState = newBoard
-
 
     start.destroy()
 #newGame
@@ -549,13 +583,13 @@ def newGame():
 
 
 
-
+#load game state from ini
 def loadGame():
 
+    global start
 
     global boardState
     boardState = readBoard(boardFile)
-
 
     start.destroy()
 #loadGame
@@ -563,6 +597,53 @@ def loadGame():
 
 
 
+
+#open calibration window to send calibration commands
+def calibrate():
+
+    #destroy start window, open calibration window
+    start.destroy()
+
+    global calib
+    calib = tk.Tk()
+    calib.title("Checkers Bot Calibration")
+    calib.geometry("400x400")
+
+    #add buttons for calibration commands
+
+    buttonA = tk.Button(master=calib, text="Column A", command=lambda: oputMove("mv A1 A8\n"))
+    buttonA.pack()
+    buttonH = tk.Button(master=calib, text="Column H",  command=lambda: oputMove("mv H1 H8\n"))
+    buttonH.pack()
+    button1 = tk.Button(master=calib, text="Row 1",  command=lambda: oputMove("mv A1 H1\n"))
+    button1.pack()
+    button8 = tk.Button(master=calib, text="Row 8",  command=lambda: oputMove("mv A8 H8\n"))
+    button8.pack()
+
+
+
+    buttonExit = tk.Button(master=calib, text="Exit Calibration", command=exitCalib)
+    buttonExit.pack()
+
+    #loop until exit
+    calib.mainloop()
+
+
+    
+#calibrate
+
+
+
+#exit calibration window
+def exitCalib():
+
+    global calib
+    calib.destroy()
+
+    #return to start window
+    startWindow()
+
+#exitCalib
 
 
 
@@ -658,24 +739,8 @@ except OSError as err:
 
 boardState = None
 
-#start window to select new or previous game
-start = tk.Tk()
-start.title("Checkers Board")
-start.geometry("600x300")
-
-#text label
-text = tk.Label(master=start, text="Checkers Bot Controller")
-text.pack(side=tk.TOP, ipady=50)
-
-#buttons for new/load game
-buttonNew = tk.Button(master=start, text="New Game", command=newGame)
-buttonNew.pack(side=tk.LEFT, ipadx=20, ipady=20, expand=True)
-buttonLoad = tk.Button(master=start, text="Load Game", command=loadGame)
-buttonLoad.pack(side=tk.RIGHT, ipadx=20, ipady=20, expand=True)
-
-#run window until selection is made
-start.mainloop()
-
+#call start window
+startWindow()
 
 
 
