@@ -21,7 +21,7 @@ DARK_COLOUR = "grey10"#"saddle brown"
 LIGHT_COLOUR = "tan1"
 ROBOT_COLOUR = "sienna4"
 OPPONENT_COLOUR = "wheat2"
-KING_BORDER = 'red'
+KING_COLOUR = 'gold'
 
 ROBOT_PIECE = 2
 ROBOT_KING = 22
@@ -202,22 +202,26 @@ def placePieces(circles, canvas):
     #place new pieces
     for row in range (0, len(boardState)):
         for col in range(0, len(boardState[i])):
+            #robot regualr piece
             if boardState[row][col] == ROBOT_PIECE:
                 circles[row][col] = canvas.create_oval(SQUARE_SIZE*col + CIRCLE_OFFSET, SQUARE_SIZE*row + CIRCLE_OFFSET, 
                                                     SQUARE_SIZE*col + CIRCLE_SIZE, SQUARE_SIZE*row + CIRCLE_SIZE, 
                                                     fill=ROBOT_COLOUR)
+            #robot king piece
             elif boardState[row][col] == ROBOT_KING:
-                circles[row][col] = canvas.create_oval(SQUARE_SIZE*col + CIRCLE_OFFSET, SQUARE_SIZE*row + CIRCLE_OFFSET, 
-                                                    SQUARE_SIZE*col + CIRCLE_SIZE, SQUARE_SIZE*row + CIRCLE_SIZE, 
-                                                    fill=ROBOT_COLOUR, width=CIRCLE_SIZE/6, outline=KING_BORDER)
+                circles[row][col] = canvas.create_oval(SQUARE_SIZE*col + CIRCLE_OFFSET*(3), SQUARE_SIZE*row + CIRCLE_OFFSET*(3), 
+                                                    SQUARE_SIZE*col + CIRCLE_SIZE*(8/9), SQUARE_SIZE*row + CIRCLE_SIZE*(8/9), 
+                                                    fill=KING_COLOUR, width=CIRCLE_SIZE/4, outline=ROBOT_COLOUR)
+            #opponent regualar piece
             elif boardState[row][col] == OPPONENT_PIECE:
                 circles[row][col] = canvas.create_oval(SQUARE_SIZE*col + CIRCLE_OFFSET, SQUARE_SIZE*row + CIRCLE_OFFSET, 
                                                     SQUARE_SIZE*col + CIRCLE_SIZE, SQUARE_SIZE*row + CIRCLE_SIZE, 
                                                     fill=OPPONENT_COLOUR)
+            #opponent king piece
             elif boardState[row][col] == OPPONENT_KING:
-                circles[row][col] = canvas.create_oval(SQUARE_SIZE*col + CIRCLE_OFFSET, SQUARE_SIZE*row + CIRCLE_OFFSET, 
-                                                    SQUARE_SIZE*col + CIRCLE_SIZE, SQUARE_SIZE*row + CIRCLE_SIZE, 
-                                                    fill=OPPONENT_COLOUR, width=CIRCLE_SIZE/6, outline=KING_BORDER)
+                circles[row][col] = canvas.create_oval(SQUARE_SIZE*col + CIRCLE_OFFSET*(3), SQUARE_SIZE*row + CIRCLE_OFFSET*(3), 
+                                                    SQUARE_SIZE*col + CIRCLE_SIZE*(8/9), SQUARE_SIZE*row + CIRCLE_SIZE*(8/9), 
+                                                    fill=KING_COLOUR, width=CIRCLE_SIZE/4, outline=OPPONENT_COLOUR)
 
 #placePieces
 
