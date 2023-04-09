@@ -8,9 +8,9 @@
 #define DEBUG
 
 
-#define OFFSET_1                      -23           // Radians offset at start
+#define OFFSET_1                      -11//-23           // Radians offset at start
 #define OFFSET_2_1                    1345          // Dang    (Long conversion not working?)
-#define OFFSET_2                      1345          // Dang    (Long conversion not working?)
+#define OFFSET_2                      1345 -21         // Dang    (Long conversion not working?)
 
 #define TICKS_PER_FULL_ROTATION_2   2576/(2*PI)
 #define TICKS_PER_FULL_ROTATION_1   3312/(2*PI)

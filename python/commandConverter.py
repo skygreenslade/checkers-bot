@@ -10,10 +10,10 @@ fifoPath = "../moves"
 #distances in mm
 LENGTHX = 40 #side length of square in x direction
 LENGTHY = 40 #side length of square in y direction
-A1CENTER = ( 0 + LENGTHX/2, 87+73 - 5 + LENGTHY/2) #center of A1 square on x-axis
+A1CENTER = ( 0 + LENGTHX/2, 87+64 + LENGTHY/2) #center of A1 square on x-axis
 
 #lengths of arms in mm
-ARM_1 = 348 - 9
+ARM_1 = 348 - 9 -5
 ARM_2 = 225 - 5    #was 225
 
 
