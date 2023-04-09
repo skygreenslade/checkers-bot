@@ -326,21 +326,21 @@ def invGetRow(letter):
     row = None
 
     if letter == 0:
-        row = '1'
-    if letter == 1:
-        row = '2'
-    if letter == 2:
-        row = '3'
-    if letter == 3:
-        row = '4'
-    if letter == 4:
-        row = '5'
-    if letter == 5:
-        row = '6'
-    if letter == 6:
-        row = '7'
-    if letter == 7:
         row = '8'
+    if letter == 1:
+        row = '7'
+    if letter == 2:
+        row = '6'
+    if letter == 3:
+        row = '5'
+    if letter == 4:
+        row = '4'
+    if letter == 5:
+        row = '3'
+    if letter == 6:
+        row = '2'
+    if letter == 7:
+        row = '1'
     
     return row
 
