@@ -618,10 +618,10 @@ def calibrate():
 
     #add buttons for calibration commands
     buttonCorners = tk.Button(master=calib, text="4 Corners", command=lambda: oputMove("4c 00 00\n"), width=9)
-    buttonA = tk.Button(master=calib, text="Column A", command=lambda: oputMove("mv A1 A8\n"), width=9)
-    buttonH = tk.Button(master=calib, text="Column H", command=lambda: oputMove("mv H1 H8\n"), width=9)
-    button1 = tk.Button(master=calib, text="Row 1", command=lambda: oputMove("mv A1 H1\n"), width=9)
-    button8 = tk.Button(master=calib, text="Row 8", command=lambda: oputMove("mv A8 H8\n"), width=9)
+    buttonA = tk.Button(master=calib, text="Column A", command=lambda: oputMove("pk A1 A8\n"), width=9)
+    buttonH = tk.Button(master=calib, text="Column H", command=lambda: oputMove("pk H1 H8\n"), width=9)
+    button1 = tk.Button(master=calib, text="Row 1", command=lambda: oputMove("pk A1 H1\n"), width=9)
+    button8 = tk.Button(master=calib, text="Row 8", command=lambda: oputMove("pk A8 H8\n"), width=9)
 
 
     buttonCorners.grid(row=1, column=0, padx=20, pady=10)

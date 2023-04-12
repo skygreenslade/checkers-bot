@@ -215,9 +215,41 @@ def corners():
 
 
 
+#poke two squares given
+def poke(pos1, pos2):
 
 
+    #convert string to positions
+    row1 = getRow(pos1[1])
+    row2 = getRow(pos2[1])
+    col1 = getCol(pos1[0])
+    col2 = getCol(pos2[0])
 
+    #calculate x,y cordinates of each position
+    pos1 = (col1*LENGTHX + A1CENTER[0], row1*LENGTHY + A1CENTER[1])
+    pos2 = (col2*LENGTHX + A1CENTER[0], row2*LENGTHY + A1CENTER[1])
+
+    #calculate thetas
+    thetas1 = invKin(pos1)
+    thetas2 = invKin(pos2)
+
+    #poke squares
+    testSerial.move_robot(float(thetas1[0]), float(thetas1[1]))
+    wait_for_arduino()
+    time.sleep(1)
+    testSerial.poke(float(thetas1[0]), float(thetas1[1]))
+    wait_for_arduino()
+    time.sleep(1)
+
+    testSerial.move_robot(float(thetas2[0]), float(thetas2[1]))
+    wait_for_arduino()
+    time.sleep(1)
+    testSerial.poke(float(thetas2[0]), float(thetas2[1]))
+    wait_for_arduino()
+    time.sleep(1)
+
+
+#def poke
 
 
 
@@ -289,6 +321,10 @@ while not exit:
         # 4 corners command
         elif params[0] == '4c':
             corners()
+
+        # poke (2 given squares) command
+        elif params[0] == 'pk':
+            poke(params[1], params[2])
 
 
         returnHome()            # move the robot arm to a position off of the board
