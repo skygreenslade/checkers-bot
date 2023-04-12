@@ -8,9 +8,9 @@
 #define DEBUG
 
 
-#define OFFSET_1                      -23           // Radians offset at start
-#define OFFSET_2_1                    1345          // Dang    (Long conversion not working?)
-#define OFFSET_2                      1345          // Dang    (Long conversion not working?)
+#define OFFSET_1                      -11             // Radians offset at start
+#define OFFSET_2_1                    1345            // Dang    (Long conversion not working?)
+#define OFFSET_2                      1345-21          // Dang    (Long conversion not working?)
 
 #define TICKS_PER_FULL_ROTATION_2   2576/(2*PI)
 #define TICKS_PER_FULL_ROTATION_1   3312/(2*PI)
@@ -94,7 +94,7 @@ enum bot_states{
   MOVING = 0,
   RECEIVING_MESSAGE,
   PICKUP_ROUTINE,
-  DROP_ROUTINE,
+  DROP_ROUTINE = 4,
   POKE_ROUTINE = 5
 };
 bot_states bot_state = RECEIVING_MESSAGE;
@@ -252,7 +252,7 @@ void waitForMessage(){
       Serial.print("Joint2: ");
       Serial.println(joint2, 3);
       Serial.print("bot state: ");
-      Serial.println(bot_state, 3);
+      Serial.println(bot_state);
 
       target_joint_ticks1 = - joint1*PI/180 * TICKS_PER_FULL_ROTATION_1;
       target_joint_ticks2 = joint2*PI/180 * TICKS_PER_FULL_ROTATION_2;
@@ -342,7 +342,7 @@ void updateDropRoutine(){
   {
     case RAISED_GRIPPING:
       // Code to move it to lowered state
-      target_joint_ticks3 = -15*PI/180*TICKS_PER_FULL_ROTATION_3;
+      target_joint_ticks3 = -16*PI/180*TICKS_PER_FULL_ROTATION_3;
       Serial.print(encoder_pos3);
       Serial.print(" ");
       Serial.println(target_joint_ticks3);
@@ -465,10 +465,6 @@ void updatePokeRoutine(){
   {
     case RAISED_RELEASED:
       // Code to move it to lowered state
-      Gripper.run(250);
-      Encoder_3.setMotorPwm(0);
-      delay(900);
-      Gripper.run(0);
       target_joint_ticks3 = -19*PI/180*TICKS_PER_FULL_ROTATION_3;
       Serial.print(encoder_pos3);
       Serial.print(" ");
@@ -510,10 +506,6 @@ void updatePokeRoutine(){
 
     case RAISED_GRIPPING:
       Serial.println("RAISED_GRIPPING");
-      Gripper.run(-250);
-      Encoder_3.setMotorPwm(0);
-      delay(900);
-      Gripper.run(0);
       // Done!
       Serial.println("Completed pickup routine");
 
@@ -627,15 +619,14 @@ void loop()
         }
       break;
 
-       case POKE_ROUTINE:
+      case POKE_ROUTINE:
         updatePokeRoutine();    // Update pickup routine state
         
-        if(arm == RAISED_RELEASED){
+        if(arm == RAISED_GRIPPING){
+          arm = RAISED_RELEASED;
           bot_state = RECEIVING_MESSAGE;
         }
       break;
-
-
 
     }
 
