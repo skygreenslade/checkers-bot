@@ -253,6 +253,40 @@ def poke(pos1, pos2):
 
 
 
+
+#converts command positions into movements and executes 
+def moveCommand(oldPos, newPos):
+
+    oldRow = getRow(oldPos[1])
+    newRow = getRow(newPos[1])
+    oldCol = getCol(oldPos[0])
+    newCol = getCol(newPos[0])
+
+    #calculate x,y cordinates of each position
+    pos1 = (oldCol*LENGTHX + A1CENTER[0], oldRow*LENGTHY + A1CENTER[1])
+    pos2 = (newCol*LENGTHX + A1CENTER[0], newRow*LENGTHY + A1CENTER[1])
+
+    #calculate thetas for each position
+    thetas1 = invKin(pos1)
+    thetas2 = invKin(pos2)
+
+    print(pos1)
+
+    # print(thetas1[0]*180/math.pi, thetas1[1]*180/math.pi, thetas2[0]*180/math.pi, thetas2[1]*180/math.pi)
+    print(thetas1[0]/math.pi, thetas1[1]/math.pi, thetas2[0]/math.pi, thetas2[1]/math.pi)
+    # print(thetas1, thetas2)
+
+    #convert thetas to appropriate values
+    thetas1 = convertRad(thetas1)   
+    thetas2 = convertRad(thetas2)
+
+    movePiece(thetas1, thetas2)
+
+#moveCommand
+
+
+
+
 ############################ main #############################
 
 
@@ -289,35 +323,8 @@ while not exit:
 
         #move command
         if params[0] == 'mv':
-            oldPos = params[1]
-            newPos = params[2]
-
-
-            oldRow = getRow(oldPos[1])
-            newRow = getRow(newPos[1])
-            oldCol = getCol(oldPos[0])
-            newCol = getCol(newPos[0])
-
-            #calculate x,y cordinates of each position
-            pos1 = (oldCol*LENGTHX + A1CENTER[0], oldRow*LENGTHY + A1CENTER[1])
-            pos2 = (newCol*LENGTHX + A1CENTER[0], newRow*LENGTHY + A1CENTER[1])
-
-            #calculate thetas for each position
-            thetas1 = invKin(pos1)
-            thetas2 = invKin(pos2)
-
-            print(pos1)
-
-            # print(thetas1[0]*180/math.pi, thetas1[1]*180/math.pi, thetas2[0]*180/math.pi, thetas2[1]*180/math.pi)
-            print(thetas1[0]/math.pi, thetas1[1]/math.pi, thetas2[0]/math.pi, thetas2[1]/math.pi)
-            # print(thetas1, thetas2)
-
-            #convert thetas to appropriate values
-            thetas1 = convertRad(thetas1)   
-            thetas2 = convertRad(thetas2)
-
-            movePiece(thetas1, thetas2)
-
+            moveCommand(params[1], params[2])
+            
         # 4 corners command
         elif params[0] == '4c':
             corners()
