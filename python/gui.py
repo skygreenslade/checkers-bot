@@ -714,8 +714,12 @@ def selectPiece(event):
     col = event.x//SQUARE_SIZE
     row = event.y//SQUARE_SIZE
 
+    #ensure click was in-bounds
+    if col>7 or row >7:
+        validPiece = False
+
     #determine what piece, if any is there
-    if circles[row][col] != 0:
+    elif circles[row][col] != 0:
          pieceToMove = [row, col]
          validPiece = True
     else:
@@ -785,6 +789,9 @@ def boardWindow():
     global canvas
     global circles
     global window
+
+    global validPiece
+    validPiece = False
 
     #open main window
     window = tk.Tk()
