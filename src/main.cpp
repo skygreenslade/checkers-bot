@@ -7,6 +7,7 @@
 #define SLOW_SPEED 40
 #define DEBUG
 
+#define SERIAL_BUFFER_SIZE            22
 
 #define OFFSET_1                      -11//-23           // Radians offset at start
 #define OFFSET_2_1                    1345          // Dang    (Long conversion not working?)
@@ -94,7 +95,8 @@ enum bot_states{
   MOVING = 0,
   RECEIVING_MESSAGE,
   PICKUP_ROUTINE,
-  DROP_ROUTINE = 4
+  DROP_ROUTINE,
+  POKE_ROUTINE,
 };
 bot_states bot_state = RECEIVING_MESSAGE;
 
@@ -209,17 +211,14 @@ void waitForButtonState(int state){
 }
 
 
-void waitForMessage(){
+void checkForMessage(){
 
-  bool waiting_for_message = true;
+  // Read the next byte from the serial port
+  while(Serial.available() >= SERIAL_BUFFER_SIZE/2){
 
-  while (waiting_for_message) {
-    // Read the next byte from the serial port
-    while(Serial.available() == 0){
-      // Do nothing
-      _NOP();        
-    }
-    byte data = Serial.read();
+    Serial.println("Processing!!!");
+
+    byte data = Serial.read();  // Read the serial buffer
 
     // Add the byte to the circular buffer
     buffer[bufferIndex] = data;
@@ -236,9 +235,8 @@ void waitForMessage(){
       #endif
 
     }
-   
-  
-    // Check if a complete packet is in the buffer
+    
+    // Check if a complete packet is received
     if (bufferIndex >= 10 && buffer[(bufferIndex)] == PACKET_END && buffer[(bufferIndex - 10)] == PACKET_START) {
       // Calculate checksum
       // Process message
@@ -259,14 +257,14 @@ void waitForMessage(){
       joint1_complete = false;
       joint2_complete = false;
 
-      waiting_for_message = false;        // End the loop
     }
-   
+    
     bufferIndex = (bufferIndex + 1) % BUFFER_SIZE;
 
   }
 
-}
+
+}// checkFormessage
 
 // Blocking function which moves the motors 
 void moveto(long dist, uint16_t motorSpeed){
@@ -458,6 +456,76 @@ void updatePickupRoutine(){
 
 }
 
+void updatePokeRoutine(){
+
+  switch (arm)
+  {
+    case RAISED_RELEASED:
+      // Code to move it to lowered state
+      Gripper.run(250);
+      Encoder_3.setMotorPwm(0);
+      delay(900);
+      Gripper.run(0);
+
+      target_joint_ticks3 = -19*PI/180*TICKS_PER_FULL_ROTATION_3;
+      Serial.print(encoder_pos3);
+      Serial.print(" ");
+      Serial.println(target_joint_ticks3);
+
+      if(encoder_pos3 < target_joint_ticks3+5 && encoder_pos3 > target_joint_ticks3-5){
+        arm = LOWERED_RELEASED;   // Switch states
+        Encoder_3.setMotorPwm(0);
+
+        Serial.println("Lowered");
+      }
+
+      break;
+    case LOWERED_RELEASED:
+      // Move to gripping state
+
+      Serial.println("LOWERED_RELEASED");
+      Gripper.run(250);
+      Encoder_3.setMotorPwm(0);
+      delay(900);
+      Gripper.run(0);
+
+      arm = LOWERED_GRIPPING;   // trigger this once gripped
+
+      break;
+
+    case LOWERED_GRIPPING:
+      target_joint_ticks3 = 0;
+      Serial.print(encoder_pos3);
+      Serial.print(" ");
+      Serial.println(target_joint_ticks3);
+
+      if(encoder_pos3 < target_joint_ticks3+5 && encoder_pos3 > target_joint_ticks3-5){
+        arm = RAISED_GRIPPING;   // Switch states
+        Encoder_3.setMotorPwm(0);
+
+        Serial.println("RAISED_GRIPPED");
+
+      }
+      // Move to raised gripping state
+      break;
+
+    case RAISED_GRIPPING:
+      Gripper.run(-250);
+      Encoder_3.setMotorPwm(0);
+      delay(900);
+      Gripper.run(0);
+      Serial.println("RAISED_GRIPPING");
+      // Done!
+      Serial.println("Completed pickup routine");
+
+      break;
+  
+      default:
+        break;
+  }
+
+}
+
 
 void setup()
 {
@@ -532,6 +600,10 @@ void loop()
           joint1_complete = false;              // reset flags
           joint2_complete = false;
         }
+        else{
+          checkForMessage();        // block until message received
+        }
+
       break;
 
       case RECEIVING_MESSAGE:
@@ -540,7 +612,7 @@ void loop()
         Encoder_2.setMotorPwm(0);
         Encoder_3.setMotorPwm(0);
 
-        waitForMessage();                     // block until message received
+        checkForMessage();                     // block until message received
         Serial.println("recv");
       break;
 
@@ -554,6 +626,14 @@ void loop()
 
       case DROP_ROUTINE:
         updateDropRoutine();    // Update pickup routine state
+        
+        if(arm == RAISED_RELEASED){
+          bot_state = RECEIVING_MESSAGE;
+        }
+      break;
+
+      case POKE_ROUTINE:
+        updatePokeRoutine();    // Update pickup routine state
         
         if(arm == RAISED_RELEASED){
           bot_state = RECEIVING_MESSAGE;
