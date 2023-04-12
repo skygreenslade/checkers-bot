@@ -838,35 +838,39 @@ def toStart():
 
 ############################ main function ################################
 
+def main():
+    #create and open FIFO
+    try:
+        os.mkfifo(fifoPath)
+    except OSError as err:
+        if err.errno != 17:
+            print("Failed to create FIFO, %s" % err)
+    try:
+        print("opening FIFO. Will wait for reader.")
+        fifo = open(fifoPath, 'w', 1)
+    except OSError as err:
+        print("Error opening file, %s", err)
 
-#create and open FIFO
-try:
-    os.mkfifo(fifoPath)
-except OSError as err:
-    if err.errno != 17:
-        print("Failed to create FIFO, %s" % err)
-try:
-    print("opening FIFO. Will wait for reader.")
-    fifo = open(fifoPath, 'w', 1)
-except OSError as err:
-    print("Error opening file, %s", err)
+    global windowState
+    windowState = START
+    boardState = None
 
-global windowState
-windowState = START
-boardState = None
+    while windowState is not EXIT:
 
-while windowState is not EXIT:
+        if windowState == START:
+            startWindow()
+        elif windowState == CALIB:
+            calibrate()
+        elif windowState == BOARD: 
+            boardWindow()
 
-    if windowState == START:
-        startWindow()
-    elif windowState == CALIB:
-        calibrate()
-    elif windowState == BOARD: 
-        boardWindow()
+    
 
-   
+    print("Program completed normally.")
 
-print("Program completed normally.")
+#main
 
 
+#run main
+main()
 
