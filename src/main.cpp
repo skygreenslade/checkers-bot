@@ -637,3 +637,40 @@ void loop()
 
 }
 
+
+enum gripper_state{
+  GRIPPER_OPEN,
+  GRIPPER_CLOSED
+};
+
+int gripperState = GRIPPER_OPEN;
+
+void toggleGripper(){
+
+  switch(gripperState){
+    case GRIPPER_OPEN:
+    //move to closed state
+
+      Gripper.run(250);
+      Encoder_3.setMotorPwm(0);
+      delay(900);
+      Gripper.run(0);
+  
+      gripperState = GRIPPER_CLOSED;   // trigger this once gripped
+      break;
+
+    case GRIPPER_CLOSED:
+      Serial.println("RAISED_GRIPPING");
+      Gripper.run(-250);
+      Encoder_3.setMotorPwm(0);
+      delay(900);
+      Gripper.run(0);
+
+      break;
+
+
+  }
+
+
+}
+
