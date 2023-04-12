@@ -7,11 +7,10 @@
 #define SLOW_SPEED 40
 #define DEBUG
 
-#define SERIAL_BUFFER_SIZE            22
 
-#define OFFSET_1                      -11//-23           // Radians offset at start
+#define OFFSET_1                      -23           // Radians offset at start
 #define OFFSET_2_1                    1345          // Dang    (Long conversion not working?)
-#define OFFSET_2                      1345 -21         // Dang    (Long conversion not working?)
+#define OFFSET_2                      1345          // Dang    (Long conversion not working?)
 
 #define TICKS_PER_FULL_ROTATION_2   2576/(2*PI)
 #define TICKS_PER_FULL_ROTATION_1   3312/(2*PI)
@@ -96,7 +95,7 @@ enum bot_states{
   RECEIVING_MESSAGE,
   PICKUP_ROUTINE,
   DROP_ROUTINE,
-  POKE_ROUTINE,
+  POKE_ROUTINE = 5
 };
 bot_states bot_state = RECEIVING_MESSAGE;
 
@@ -211,14 +210,17 @@ void waitForButtonState(int state){
 }
 
 
-void checkForMessage(){
+void waitForMessage(){
 
-  // Read the next byte from the serial port
-  while(Serial.available() >= SERIAL_BUFFER_SIZE/2){
+  bool waiting_for_message = true;
 
-    Serial.println("Processing!!!");
-
-    byte data = Serial.read();  // Read the serial buffer
+  while (waiting_for_message) {
+    // Read the next byte from the serial port
+    while(Serial.available() == 0){
+      // Do nothing
+      _NOP();        
+    }
+    byte data = Serial.read();
 
     // Add the byte to the circular buffer
     buffer[bufferIndex] = data;
@@ -235,8 +237,9 @@ void checkForMessage(){
       #endif
 
     }
-    
-    // Check if a complete packet is received
+   
+  
+    // Check if a complete packet is in the buffer
     if (bufferIndex >= 10 && buffer[(bufferIndex)] == PACKET_END && buffer[(bufferIndex - 10)] == PACKET_START) {
       // Calculate checksum
       // Process message
@@ -257,14 +260,14 @@ void checkForMessage(){
       joint1_complete = false;
       joint2_complete = false;
 
+      waiting_for_message = false;        // End the loop
     }
-    
+   
     bufferIndex = (bufferIndex + 1) % BUFFER_SIZE;
 
   }
 
-
-}// checkFormessage
+}
 
 // Blocking function which moves the motors 
 void moveto(long dist, uint16_t motorSpeed){
@@ -466,7 +469,6 @@ void updatePokeRoutine(){
       Encoder_3.setMotorPwm(0);
       delay(900);
       Gripper.run(0);
-
       target_joint_ticks3 = -19*PI/180*TICKS_PER_FULL_ROTATION_3;
       Serial.print(encoder_pos3);
       Serial.print(" ");
@@ -484,10 +486,7 @@ void updatePokeRoutine(){
       // Move to gripping state
 
       Serial.println("LOWERED_RELEASED");
-      Gripper.run(250);
-      Encoder_3.setMotorPwm(0);
-      delay(900);
-      Gripper.run(0);
+
 
       arm = LOWERED_GRIPPING;   // trigger this once gripped
 
@@ -510,11 +509,11 @@ void updatePokeRoutine(){
       break;
 
     case RAISED_GRIPPING:
+      Serial.println("RAISED_GRIPPING");
       Gripper.run(-250);
       Encoder_3.setMotorPwm(0);
       delay(900);
       Gripper.run(0);
-      Serial.println("RAISED_GRIPPING");
       // Done!
       Serial.println("Completed pickup routine");
 
@@ -600,10 +599,6 @@ void loop()
           joint1_complete = false;              // reset flags
           joint2_complete = false;
         }
-        else{
-          checkForMessage();        // block until message received
-        }
-
       break;
 
       case RECEIVING_MESSAGE:
@@ -612,7 +607,7 @@ void loop()
         Encoder_2.setMotorPwm(0);
         Encoder_3.setMotorPwm(0);
 
-        checkForMessage();                     // block until message received
+        waitForMessage();                     // block until message received
         Serial.println("recv");
       break;
 
@@ -632,13 +627,14 @@ void loop()
         }
       break;
 
-      case POKE_ROUTINE:
+       case POKE_ROUTINE:
         updatePokeRoutine();    // Update pickup routine state
         
         if(arm == RAISED_RELEASED){
           bot_state = RECEIVING_MESSAGE;
         }
       break;
+
 
 
     }
