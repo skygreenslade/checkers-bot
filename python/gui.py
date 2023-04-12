@@ -29,6 +29,11 @@ OPPONENT_PIECE = 3
 OPPONENT_KING = 33
 NO_PIECE = 0
 
+EXIT = 0
+START = 1
+CALIB = 2
+BOARD = 3
+
 
 
 global pieceToMove
@@ -201,7 +206,7 @@ def placePieces(circles, canvas):
 
     #place new pieces
     for row in range (0, len(boardState)):
-        for col in range(0, len(boardState[i])):
+        for col in range(0, len(boardState[col])):
             #robot regualr piece
             if boardState[row][col] == ROBOT_PIECE:
                 circles[row][col] = canvas.create_oval(SQUARE_SIZE*col + CIRCLE_OFFSET, SQUARE_SIZE*row + CIRCLE_OFFSET, 
@@ -548,6 +553,10 @@ def startWindow():
 
     global start
 
+    #default window state to closed
+    global windowState
+    windowState = EXIT
+
     #start window to select new or previous game
     start = tk.Tk()
     start.title("Checkers Board")
@@ -564,7 +573,7 @@ def startWindow():
     buttonLoad = tk.Button(master=start, text="Load Game", command=loadGame, width=10)
     buttonLoad.grid(row=1, column=1, padx=20, pady=20, ipady=20, ipadx=10)
 
-    buttonCalib = tk.Button(master=start, text="Calibrate", command=calibrate, width=10)
+    buttonCalib = tk.Button(master=start, text="Calibrate", command=toCalibrate, width=10)
     buttonCalib.grid(row=1, column=2, padx=20, pady=20, ipady=20, ipadx=10)
 
     #padding
@@ -580,16 +589,29 @@ def startWindow():
 
 
 
+def toCalibrate():
 
+    global windowState
+    global start
+
+    start.destroy()
+
+    windowState = CALIB
+
+
+#toCalibrate
 
 
 #use new game board
 def newGame():
 
     global start
-
+    global windowState
     global boardState
+
     boardState = newBoard
+
+    windowState = BOARD
 
     start.destroy()
 #newGame
@@ -601,9 +623,12 @@ def newGame():
 def loadGame():
 
     global start
-
+    global windowState
     global boardState
+
     boardState = readBoard(boardFile)
+
+    windowState = BOARD
 
     start.destroy()
 #loadGame
@@ -615,8 +640,9 @@ def loadGame():
 #open calibration window to send calibration commands
 def calibrate():
 
-    #destroy start window, open calibration window
-    start.destroy()
+    #default window state to closed
+    global windowState
+    windowState = EXIT
 
     global calib
     calib = tk.Tk()
@@ -656,10 +682,12 @@ def calibrate():
 def exitCalib():
 
     global calib
+    global windowState
+
     calib.destroy()
 
     #return to start window
-    startWindow()
+    windowState = START
 
 #exitCalib
 
@@ -738,39 +766,20 @@ def releasePiece(event):
 
 
 
-############################ main function ################################
+def boardWindow():
 
+    #default window state to closed
+    global windowState
+    windowState = EXIT
 
-#create and open FIFO
-try:
-    os.mkfifo(fifoPath)
-except OSError as err:
-    if err.errno != 17:
-        print("Failed to create FIFO, %s" % err)
-try:
-    print("opening FIFO. Will wait for reader.")
-    fifo = open(fifoPath, 'w', 1)
-except OSError as err:
-    print("Error opening file, %s", err)
-
-
-
-boardState = None
-
-#call start window
-startWindow()
-
-
-
-
-#if board state not defined (start window was closed), exit program
-if boardState is not None:
-
+    global canvas
+    global circles
+    global window
 
     #open main window
     window = tk.Tk()
     window.title("Checkers Board")
-    window.geometry(str(SQUARE_SIZE*8)+"x"+str(SQUARE_SIZE*8))
+    window.geometry(str(SQUARE_SIZE*8)+"x"+str(SQUARE_SIZE*9))
 
     #create canvas
     canvas = tk.Canvas(window, width=SQUARE_SIZE*8, height=SQUARE_SIZE*8)
@@ -795,6 +804,12 @@ if boardState is not None:
     writeBoard(boardFile)
     placePieces(circles, canvas)
 
+
+    #add back/exit buttons
+    backButton = tk.Button(master=window, text="Back to Menu", command=toStart, width=9)
+    backButton.pack(pady=SQUARE_SIZE/4)
+
+
     #bind mouse functions
     window.bind('<Button-1>', selectPiece)
     window.bind('<Motion>', movePiece)
@@ -803,8 +818,53 @@ if boardState is not None:
     #loop
     window.mainloop()
 
+#boardWindow
 
 
+
+def toStart():
+
+    global windowState
+
+    window.destroy()
+
+    windowState = START
+
+#toStart
+
+
+
+
+
+############################ main function ################################
+
+
+#create and open FIFO
+try:
+    os.mkfifo(fifoPath)
+except OSError as err:
+    if err.errno != 17:
+        print("Failed to create FIFO, %s" % err)
+try:
+    print("opening FIFO. Will wait for reader.")
+    fifo = open(fifoPath, 'w', 1)
+except OSError as err:
+    print("Error opening file, %s", err)
+
+global windowState
+windowState = START
+boardState = None
+
+while windowState is not EXIT:
+
+    if windowState == START:
+        startWindow()
+    elif windowState == CALIB:
+        calibrate()
+    elif windowState == BOARD: 
+        boardWindow()
+
+   
 
 print("Program completed normally.")
 
