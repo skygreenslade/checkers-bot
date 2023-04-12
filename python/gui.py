@@ -478,7 +478,7 @@ def move(oldPos, newPos):
 
         #write remove command if piece was removed
         if capture:
-            toRemove ="rm " + invGetCol((oldCol+newCol)//2) + invGetRow((oldRow+newRow)//2)
+            toRemove ="rm " + invGetCol((oldCol+newCol)//2) + invGetRow((oldRow+newRow)//2) + '\n'
             oputMove(toRemove)
             
 

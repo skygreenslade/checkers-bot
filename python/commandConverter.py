@@ -308,10 +308,8 @@ def remove(pos):
     thetas1 = invKin(pos1)
     thetas2 = (40, 135)
 
-    #convert to radians
+    #convert from radians
     thetas1 = convertRad(thetas1)   
-    thetas2 = convertRad(thetas2)
-
 
     movePiece(thetas1, thetas2)
 
