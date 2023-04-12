@@ -41,6 +41,9 @@ def pickup(joint1, joint2):
 def drop(joint1, joint2):
     send_packet(joint1, joint2, 4)              # drop state = 4
 
+def poke(joint1, joint2):
+    send_packet(joint1, joint2, 5)
+
 
 def read_serial():
     while True:

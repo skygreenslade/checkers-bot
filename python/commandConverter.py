@@ -165,6 +165,62 @@ def returnHome():
     time.sleep(1)
 
 
+
+def corners():
+
+    #get corner coordinates
+    corner1 = (0*LENGTHX + A1CENTER[0], 0*LENGTHY + A1CENTER[1])
+    corner2 = (0*LENGTHX + A1CENTER[0], 7*LENGTHY + A1CENTER[1])
+    corner3 = (7*LENGTHX + A1CENTER[0], 7*LENGTHY + A1CENTER[1])
+    corner4 = (7*LENGTHX + A1CENTER[0], 0*LENGTHY + A1CENTER[1])
+
+    #get corner thetas
+    thetasC1 = invKin(corner1)
+    thetasC2 = invKin(corner2)
+    thetasC3 = invKin(corner3)
+    thetasC4 = invKin(corner4)
+
+
+    #send commands to poke each corner
+    testSerial.move_robot(float(thetasC1[0]), float(thetasC1[1]))
+    wait_for_arduino()
+    time.sleep(1)
+    testSerial.poke(float(thetasC1[0]), float(thetasC1[1]))
+    wait_for_arduino()
+    time.sleep(1)
+
+    testSerial.move_robot(float(thetasC2[0]), float(thetasC2[1]))
+    wait_for_arduino()
+    time.sleep(1)
+    testSerial.poke(float(thetasC2[0]), float(thetasC2[1]))
+    wait_for_arduino()
+    time.sleep(1)
+
+    testSerial.move_robot(float(thetasC3[0]), float(thetasC3[1]))
+    wait_for_arduino()
+    time.sleep(1)
+    testSerial.poke(float(thetasC3[0]), float(thetasC3[1]))
+    wait_for_arduino()
+    time.sleep(1)
+
+    testSerial.move_robot(float(thetasC4[0]), float(thetasC4[1]))
+    wait_for_arduino()
+    time.sleep(1)
+    testSerial.poke(float(thetasC4[0]), float(thetasC4[1]))
+    wait_for_arduino()
+    time.sleep(1)
+
+#corners
+
+
+
+
+
+
+
+
+
+
 ############################ main #############################
 
 
@@ -198,34 +254,42 @@ while not exit:
 
         #parse input. NO ERROR HANDLING (only valid commands passed from checkersBoard.py)
         params = cmd.split(' ')
-        oldPos = params[1]
-        newPos = params[2]
+
+        #move command
+        if params[0] == 'mv':
+            oldPos = params[1]
+            newPos = params[2]
 
 
-        oldRow = getRow(oldPos[1])
-        newRow = getRow(newPos[1])
-        oldCol = getCol(oldPos[0])
-        newCol = getCol(newPos[0])
+            oldRow = getRow(oldPos[1])
+            newRow = getRow(newPos[1])
+            oldCol = getCol(oldPos[0])
+            newCol = getCol(newPos[0])
 
-        #calculate x,y cordinates of each position
-        pos1 = (oldCol*LENGTHX + A1CENTER[0], oldRow*LENGTHY + A1CENTER[1])
-        pos2 = (newCol*LENGTHX + A1CENTER[0], newRow*LENGTHY + A1CENTER[1])
+            #calculate x,y cordinates of each position
+            pos1 = (oldCol*LENGTHX + A1CENTER[0], oldRow*LENGTHY + A1CENTER[1])
+            pos2 = (newCol*LENGTHX + A1CENTER[0], newRow*LENGTHY + A1CENTER[1])
 
-        #calculate thetas for each position
-        thetas1 = invKin(pos1)
-        thetas2 = invKin(pos2)
+            #calculate thetas for each position
+            thetas1 = invKin(pos1)
+            thetas2 = invKin(pos2)
 
-        print(pos1)
+            print(pos1)
 
-        # print(thetas1[0]*180/math.pi, thetas1[1]*180/math.pi, thetas2[0]*180/math.pi, thetas2[1]*180/math.pi)
-        print(thetas1[0]/math.pi, thetas1[1]/math.pi, thetas2[0]/math.pi, thetas2[1]/math.pi)
-        # print(thetas1, thetas2)
+            # print(thetas1[0]*180/math.pi, thetas1[1]*180/math.pi, thetas2[0]*180/math.pi, thetas2[1]*180/math.pi)
+            print(thetas1[0]/math.pi, thetas1[1]/math.pi, thetas2[0]/math.pi, thetas2[1]/math.pi)
+            # print(thetas1, thetas2)
 
-        #convert thetas to appropriate values
-        thetas1 = convertRad(thetas1)   
-        thetas2 = convertRad(thetas2)
+            #convert thetas to appropriate values
+            thetas1 = convertRad(thetas1)   
+            thetas2 = convertRad(thetas2)
 
-        movePiece(thetas1, thetas2)
+            movePiece(thetas1, thetas2)
+
+        # 4 corners command
+        elif params[0] == '4c':
+            corners()
+
 
         returnHome()            # move the robot arm to a position off of the board
 
