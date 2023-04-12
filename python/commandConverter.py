@@ -180,6 +180,12 @@ def corners():
     thetasC3 = invKin(corner3)
     thetasC4 = invKin(corner4)
 
+    #convert thetas to appropriate values
+    thetasC1 = convertRad(thetasC1)   
+    thetasC2 = convertRad(thetasC2)
+    thetasC3 = convertRad(thetasC3)   
+    thetasC4 = convertRad(thetasC4)
+
 
     #send commands to poke each corner
     testSerial.move_robot(float(thetasC1[0]), float(thetasC1[1]))
@@ -232,6 +238,10 @@ def poke(pos1, pos2):
     #calculate thetas
     thetas1 = invKin(pos1)
     thetas2 = invKin(pos2)
+
+    #convert thetas to appropriate values
+    thetas1 = convertRad(thetas1)   
+    thetas2 = convertRad(thetas2)
 
     #poke squares
     testSerial.move_robot(float(thetas1[0]), float(thetas1[1]))
