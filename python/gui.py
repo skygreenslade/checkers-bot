@@ -476,8 +476,8 @@ def move(oldPos, newPos):
             output = 'mv' + ' ' + oldPos[1] + oldPos[0] + ' ' + newPos[1] + newPos[0] + '\n'
             oputMove(output)
 
-        #write remove command if piece was removed
-        if capture:
+        #write remove command if piece was removed by robot
+        if capture and piece%3 != 0:
             toRemove ="rm " + invGetCol((oldCol+newCol)//2) + invGetRow((oldRow+newRow)//2)
             oputMove(toRemove)
             
