@@ -539,6 +539,8 @@ def printBoard(board):
 
 #outputs given string to given fifo
 def oputMove(toOput):
+
+    global fifo
     print("writing to fifo: ",toOput)
 
     #write to fifo
@@ -609,7 +611,15 @@ def newGame():
     global windowState
     global boardState
 
-    boardState = newBoard
+    boardState = [[0, 3, 0, 3, 0, 3, 0, 3],
+                  [3, 0, 3, 0, 3, 0, 3, 0],
+                  [0, 3, 0, 3, 0, 3, 0, 3],
+                  [0, 0, 0, 0, 0, 0, 0, 0],
+                  [0, 0, 0, 0, 0, 0, 0, 0],
+                  [2, 0, 2, 0, 2, 0, 2, 0],
+                  [0, 2, 0, 2, 0, 2, 0, 2],
+                  [2, 0, 2, 0, 2, 0, 2, 0]]
+    writeBoard(boardFile)
 
     windowState = BOARD
 
@@ -840,6 +850,9 @@ def toStart():
 
 def main():
     #create and open FIFO
+
+    global fifo
+
     try:
         os.mkfifo(fifoPath)
     except OSError as err:
@@ -853,7 +866,6 @@ def main():
 
     global windowState
     windowState = START
-    boardState = None
 
     while windowState is not EXIT:
 
