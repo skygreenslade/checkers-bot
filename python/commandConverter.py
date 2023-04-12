@@ -161,7 +161,7 @@ def movePiece(thetas1, thetas2):
 
 def returnHome():
     testSerial.move_robot(40, 135)
-    #wait_for_arduino()
+    wait_for_arduino()
     time.sleep(1)
 
 
