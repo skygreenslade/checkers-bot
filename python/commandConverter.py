@@ -296,6 +296,29 @@ def moveCommand(oldPos, newPos):
 
 
 
+def remove(pos):
+
+    row = getRow(pos[1])
+    col = getCol(pos[0])  
+
+    #calculate x,y cordinates of each position
+    pos1 = (col*LENGTHX + A1CENTER[0], row*LENGTHY + A1CENTER[1])
+
+    #calculate thetas
+    thetas1 = invKin(pos1)
+    thetas2 = (40, 135)
+
+    #convert to radians
+    thetas1 = convertRad(thetas1)   
+    thetas2 = convertRad(thetas2)
+
+
+    movePiece(thetas1, thetas2)
+
+
+#remove
+
+
 
 ############################ main #############################
 
@@ -343,6 +366,9 @@ while not exit:
         elif params[0] == 'pk':
             poke(params[1], params[2])
 
+        # remove piece from board
+        elif params[0] == 'rm':
+            remove(params[1])
 
         returnHome()            # move the robot arm to a position off of the board
 

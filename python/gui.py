@@ -475,6 +475,11 @@ def move(oldPos, newPos):
         if piece%3 != 0:
             output = 'mv' + ' ' + oldPos[1] + oldPos[0] + ' ' + newPos[1] + newPos[0] + '\n'
             oputMove(output)
+
+        #write remove command if piece was removed
+        if capture:
+            toRemove ="rm " + invGetCol((oldCol+newCol)//2) + invGetRow((oldRow+newRow)//2)
+            oputMove(toRemove)
             
 
     return error
